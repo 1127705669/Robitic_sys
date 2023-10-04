@@ -5,6 +5,8 @@
 #ifndef EDRIVE_APP_EDRIVE_H_
 #define EDRIVE_APP_EDRIVE_H_
 
+#include <string.h>
+
 namespace Robotic_sys {
 namespace common {
 
@@ -13,6 +15,32 @@ enum Result_state {
   State_Running,
   State_Failed
 };
+
+
+class ConponentBase {
+ public:
+
+  virtual Result_state Init() = 0;
+
+  virtual Result_state Start() = 0;
+
+  virtual void Stop() = 0;
+
+  virtual String Name() const = 0;
+
+};
+
+class ComponentAgent(){
+ public:
+  virtual Result_state Init();
+
+  virtual Reslut_state Start();
+}
+
+class BuzzleAgent {
+ public:
+  
+}
 
 } // namespace common
 } // namespace Robotic_sys

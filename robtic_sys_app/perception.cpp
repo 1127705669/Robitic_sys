@@ -2,38 +2,33 @@
  * Copyright 2023 The EDrive Authors. All Rights Reserved.
  *****************************************************************************/
 
-#pragma once
-
 #include <Arduino.h>
 
 #include "common.h"
+#include "perception.h"
 
 namespace Robotic_sys {
 namespace perception {
 
 using Robotic_sys::common::Result_state;
 
-class Perception : public Robotic_sys::common::ConponentBase{
- public:
+char Perception::Name() const { return "perception"; }
 
-  char Name() const override;
+Result_state Perception::Init(){
+ Serial.println("Perception init, starting...");
+ 
+ return Result_state::State_Ok;
+}
 
-  Result_state Init() override;
+Result_state Perception::Start(){
+   
 
-  Result_state Start() override;
+ return Result_state::State_Ok;
+}
 
-  void Stop() override;
-
-  virtual ~Perception() = default;
-
- private:
-  
-  const int sensorPin = 0xA0;
-  const int threshold = 500; // 调整此阈值以适应你的传感器和环境
-
-//  Result_state Send_result();
-
-};
+void Perception::Stop(){
+ 
+}
 
 } // namespace perception
 } // namespace Robotic_sys

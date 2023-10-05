@@ -23,31 +23,42 @@
 */
 
 #include "common.h"
-#include "controller.h"
+#include "perception.h"
+#include "control.h"
 
-// the setup function runs once when you press reset or power the board
-int motorSpeedPin1 = 9; // 电机1速度控制引脚
-int motorDirectionPin1 = 8; // 电机1方向控制引脚
-int motorSpeedPin2 = 10; // 电机2速度控制引脚
-int motorDirectionPin2 = 11; // 电机2方向控制引脚
+#define INIT_COMPONENT()                                       \
+  static Robotic_sys::perception::Perception perception;       \
+  static Robotic_sys::control::Control control;                \
+  static Robotic_sys::common::BuzzleAgent buzzle;              \
+
+INIT_COMPONENT();
 
 void setup() {
-  Robotic_sys::common::Result_state state;
+  Serial.begin(9600);
+
+  delay(1000);
+
+  if(Robotic_sys::common::Result_state::State_Ok != buzzle.Init()){
+    
+  }
   
-  // 设置电机控制引脚为输出模式
-  pinMode(motorSpeedPin1, OUTPUT);
-  pinMode(motorDirectionPin1, OUTPUT);
-  pinMode(motorSpeedPin2, OUTPUT);
-  pinMode(motorDirectionPin2, OUTPUT);
+  if(Robotic_sys::common::Result_state::State_Ok != perception.Init()){
+    
+  }
+
+  if(Robotic_sys::common::Result_state::State_Ok != control.Init()){
+    
+  }
+
+  buzzle.Play(500);
+  
+  
 }
 
 void loop() {
-  // 向前移动
-  Serial.println("Debug: Code is running.");
-  digitalWrite(motorDirectionPin1, HIGH); // 设置电机1正向
-  digitalWrite(motorDirectionPin2, HIGH); // 设置电机2正向
-  analogWrite(motorSpeedPin1, 0); // 设置电机1速度最大
-  analogWrite(motorSpeedPin2, 0); // 设置电机2速度最大
 
-  // 在这里可以添加延迟或其他控制逻辑
+  auto a = perception.Start();
+
+  auto b = control.Start();
+  
 }

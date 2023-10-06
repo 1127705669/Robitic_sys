@@ -23,10 +23,14 @@
 */
 
 #include "common.h"
+#include "localization.h"
 #include "perception.h"
 #include "control.h"
 
+using Robotic_sys::common::Result_state;
+
 #define INIT_COMPONENT()                                       \
+  static Robotic_sys::localization::Localization localization; \
   static Robotic_sys::perception::Perception perception;       \
   static Robotic_sys::control::Control control;                \
   static Robotic_sys::common::BuzzleAgent buzzle;              \
@@ -36,23 +40,29 @@ INIT_COMPONENT();
 void setup() {
   Serial.begin(9600);
 
-  delay(1000);
+  // waiting for conection finish
+  delay(3000);
 
-  if(Robotic_sys::common::Result_state::State_Ok != buzzle.Init()){
-    
+  if(Result_state::State_Ok != localization.Init()){
+    Serial.println("location init failed!");
   }
   
-  if(Robotic_sys::common::Result_state::State_Ok != perception.Init()){
-    
+  if(Result_state::State_Ok != perception.Init()){
+    Serial.println("perception init failed!");
   }
 
-  if(Robotic_sys::common::Result_state::State_Ok != control.Init()){
-    
+  if(Result_state::State_Ok != control.Init()){
+    Serial.println("control init failed!");
   }
+
+  if(Result_state::State_Ok != buzzle.Init()){
+    Serial.println("buzzle init failed!");
+  }
+
+  
 
   buzzle.Play(500);
-  
-  
+
 }
 
 void loop() {
@@ -60,5 +70,5 @@ void loop() {
   auto a = perception.Start();
 
   auto b = control.Start();
-  
+
 }

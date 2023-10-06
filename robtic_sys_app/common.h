@@ -5,6 +5,7 @@
 #ifndef EDRIVE_APP_EDRIVE_H_
 #define EDRIVE_APP_EDRIVE_H_
 
+#include <Arduino.h>
 #include <string.h>
 
 namespace Robotic_sys {
@@ -25,7 +26,7 @@ class ConponentBase {
 
   virtual void Stop() = 0;
 
-  virtual char Name() const = 0;
+  virtual const char* Name() const = 0;
 
 };
 

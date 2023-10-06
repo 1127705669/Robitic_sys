@@ -6,18 +6,23 @@
 
 #include "common.h"
 #include "control.h"
+#include "pid_controller.h"
 
 namespace Robotic_sys {
 namespace control {
 
 using Robotic_sys::common::Result_state;
 
-char Control::Name() const { return "control"; }
+const char* Control::Name() const { return "control"; }
+
+void Control::ComputeLateralErrors(){
+  
+}
 
 Result_state Control::Init(){
   Serial.println("control init, starting...");
 
-  // 设置电机控制引脚为输出模式
+  // set pin
   pinMode(motorSpeedPin1, OUTPUT);
   pinMode(motorDirectionPin1, OUTPUT);
   pinMode(motorSpeedPin2, OUTPUT);
@@ -27,17 +32,30 @@ Result_state Control::Init(){
 }
 
 Result_state Control::Start(){
- digitalWrite(motorDirectionPin1, HIGH); // 设置电机1正向
- digitalWrite(motorDirectionPin2, HIGH); // 设置电机2正向
- analogWrite(motorSpeedPin1, 50); // 设置电机1速度最大
- analogWrite(motorSpeedPin2, 50); // 设置电机2速度最大
+
+  Result_state status = ProduceControlCommand();
+  
+ digitalWrite(motorDirectionPin1, HIGH);
+ digitalWrite(motorDirectionPin2, LOW);
+ analogWrite(motorSpeedPin1, 100);
+ analogWrite(motorSpeedPin2, 20);
+
+// Serial.println("control strated..");
 
  return Result_state::State_Ok;
 }
 
 void Control::Stop(){
- 
+
 }
+
+Result_state Control::ProduceControlCommand(){
+
+  ComputeLateralErrors();
+  return Result_state::State_Ok;
+}
+
+
 
 } // namespace control
 } // namespace Robotic_sys

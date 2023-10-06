@@ -2,33 +2,31 @@
  * Copyright 2023 The EDrive Authors. All Rights Reserved.
  *****************************************************************************/
 
-#include <Arduino.h>
-
 #include "common.h"
-#include "perception.h"
+#include "localization.h"
 
 namespace Robotic_sys {
-namespace perception {
+namespace localization {
 
 using Robotic_sys::common::Result_state;
 
- const char* Perception::Name() const {return "perception";}
+ const char* Localization::Name() const {return "localization";}
 
-Result_state Perception::Init(){
- Serial.println("Perception init, starting...");
+Result_state Localization::Init(){
+ Serial.println("localization init, starting...");
  
  return Result_state::State_Ok;
 }
 
-Result_state Perception::Start(){
+Result_state Localization::Start(){
    
 
  return Result_state::State_Ok;
 }
 
-void Perception::Stop(){
+void Localization::Stop(){
  
 }
 
-} // namespace perception
+} // namespace localization
 } // namespace Robotic_sys

@@ -2,7 +2,7 @@
  * Copyright 2023 The EDrive Authors. All Rights Reserved.
  *****************************************************************************/
 
-
+#include "common.h"
 
 namespace Robotic_sys {
 namespace control {
@@ -12,7 +12,7 @@ using Robotic_sys::common::Result_state;
 class Control : public Robotic_sys::common::ConponentBase{
  public:
 
-  char Name() const override;
+  const char* Name() const override;
 
   Result_state Init() override;
 
@@ -23,6 +23,8 @@ class Control : public Robotic_sys::common::ConponentBase{
   virtual ~Control() = default;
 
  private:
+
+  Result_state ProduceControlCommand();
   
   
   // the setup function runs once when you press reset or power the board
@@ -32,6 +34,9 @@ class Control : public Robotic_sys::common::ConponentBase{
   const int motorDirectionPin2 = 11; // 电机2方向控制引脚
 
 //  Result_state Send_result();
+
+ protected:
+  void ComputeLateralErrors();
 
 };
 

@@ -33,7 +33,6 @@ using Robotic_sys::common::Result_state;
   static Robotic_sys::localization::Localization localization; \
   static Robotic_sys::perception::Perception perception;       \
   static Robotic_sys::control::Control control;                \
-  static Robotic_sys::common::BuzzleAgent buzzle;              \
 
 INIT_COMPONENT();
 
@@ -55,20 +54,12 @@ void setup() {
     Serial.println("control init failed!");
   }
 
-  if(Result_state::State_Ok != buzzle.Init()){
-    Serial.println("buzzle init failed!");
-  }
-
+  Robotic_sys::common::BuzzleInit();
   
-
-  buzzle.Play(500);
+  
 
 }
 
 void loop() {
-
-  auto a = perception.Start();
-
-  auto b = control.Start();
-
+  
 }

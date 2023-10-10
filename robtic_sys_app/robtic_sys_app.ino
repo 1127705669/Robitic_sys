@@ -55,11 +55,14 @@ void setup() {
   }
 
   Robotic_sys::common::BuzzleInit();
+
+  Robotic_sys::common::BuzzlePlayTone(300);
   
-  
+  Serial.println("init done!");
 
 }
 
 void loop() {
-  
+  Result_state state;
+  state = perception.Start();
 }

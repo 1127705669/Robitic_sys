@@ -10,6 +10,12 @@
 namespace Robotic_sys {
 namespace common {
 
+class StateMachine {
+ public: 
+
+ private:
+};
+
 enum Result_state {
   State_Ok,
   State_Running,

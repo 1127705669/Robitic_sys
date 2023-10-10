@@ -16,7 +16,7 @@ void BuzzleInit() {
 
 void BuzzlePlayTone(int duration, int frequency = 1000) {
   const int buzzerPin = 6;
-  tone(buzzerPin, 1000); // 发出1000Hz的声音
+  tone(buzzerPin, 800); // 发出1000Hz的声音
   delay(duration);             // 持续500毫秒
   noTone(buzzerPin);      // 停止声音
 }

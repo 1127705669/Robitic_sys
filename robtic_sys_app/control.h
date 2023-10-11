@@ -40,5 +40,14 @@ class Control : public Robotic_sys::common::ConponentBase{
 
 };
 
+class Motors{
+ public:
+  void Init();
+  
+  void SetMontorPower(float l_pwm, float r_pwm){
+    
+  }
+};
+
 } // namespace control
 } // namespace Robotic_sys

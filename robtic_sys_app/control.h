@@ -13,26 +13,30 @@ class Motors{
  public:
   void Init();
   
-  void SetMontorPower(int l_pwm, int r_pwm);
+  void SetMontorPower(int left_pwm = 20, int right_pwm = 20);
 
  private:
   // the setup function runs once when you press reset or power the board
-  const int motorSpeedPin1 = 9; // 电机1速度控制引脚
-  const int motorDirectionPin1 = 8; // 电机1方向控制引脚
-  const int motorSpeedPin2 = 10; // 电机2速度控制引脚
-  const int motorDirectionPin2 = 11; // 电机2方向控制引脚
+  const int motor_left_direction_pin_ = 16; // 电机1方向控制引脚
+  const int motor_right_direction_pin_ = 15; // 电机2方向控制引脚
+  const int motor_left_speed_pin_ = 10; // 电机2速度控制引脚
+  const int motor_right_speed_pin_ = 9; // 电机1速度控制引脚
 };
 
-class Control : public Robotic_sys::common::ConponentBase{
+class Control{
  public:
 
-  const char* Name() const override;
+  const char* Name() const;
 
-  Result_state Init() override;
+  Result_state Init();
 
-  Result_state Start() override;
+  Result_state Start();
 
-  void Stop() override;
+  void BangBangControl(unsigned long* gray_scale);
+
+  void GoFixedSpeed(int left_pwm, int right_pwm);
+
+  void Stop();
 
   virtual ~Control() = default;
 

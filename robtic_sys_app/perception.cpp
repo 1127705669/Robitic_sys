@@ -45,7 +45,8 @@ void SensorAgent::Reset(){
   }
 }
 
-void SensorAgent::GetGrayscale(unsigned long* gray_scale){
+unsigned long SensorAgent::GetGrayscale(unsigned long* gray_scale){
+  unsigned long max_gray_scale;
   
   for(int sensor_number = 0; sensor_number < sensor_number_; sensor_number++){
     pinMode(sensor_lists_[sensor_number].pin, OUTPUT);
@@ -70,6 +71,9 @@ void SensorAgent::GetGrayscale(unsigned long* gray_scale){
         unsigned long current_time = micros();
         sensor_lists_[sensor_number].sensor_time_ = current_time - start_time;
         sensor_lists_[sensor_number].is_updated_ = true;
+        if(max_gray_scale < sensor_lists_[sensor_number].sensor_time_){
+          max_gray_scale = sensor_lists_[sensor_number].sensor_time_;
+        }
       }
     }
   }
@@ -79,6 +83,8 @@ void SensorAgent::GetGrayscale(unsigned long* gray_scale){
   }
 
   Reset();
+  
+  return max_gray_scale;
 }
 
 const char* Perception::Name() const {return "perception";}
@@ -95,9 +101,12 @@ Result_state Perception::Init(){
 
 Result_state Perception::GetGrayScale(unsigned long* gray_scale){
 
-  sensor_agent_.GetGrayscale(gray_scale);
-  
+  max_gray_scale_ = sensor_agent_.GetGrayscale(gray_scale);
   return Result_state::State_Ok;
+}
+
+unsigned long Perception::GetMaxScale(){
+  return max_gray_scale_;
 }
 
 void Perception::Stop(){

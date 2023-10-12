@@ -22,14 +22,13 @@ class Sensor{
   int pin;
   bool is_updated_ = false;
   unsigned long sensor_time_ = 0;
-  
 };
 
 class SensorAgent{
  public:
   Result_state Init();
 
-  void GetGrayscale(unsigned long* gray_scale);
+  unsigned long GetGrayscale(unsigned long* gray_scale);
 
   void Reset();
 
@@ -48,7 +47,6 @@ class SensorAgent{
   const int sensor_number_ = 5;
 
   const int sensor_charge_time_ = 10;
-  
 };
 
 class Perception{
@@ -60,6 +58,8 @@ class Perception{
 
   Result_state GetGrayScale(unsigned long* gray_scale);
 
+  unsigned long GetMaxScale();
+
   void Stop();
 
   virtual ~Perception() = default;
@@ -67,6 +67,7 @@ class Perception{
  private:
 
   SensorAgent sensor_agent_;
+  unsigned long max_gray_scale_;
 
 };
 

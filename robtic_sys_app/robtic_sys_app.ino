@@ -29,10 +29,11 @@
 
 using Robotic_sys::common::Result_state;
 
-#define INIT_COMPONENT()                                       \
-   Robotic_sys::localization::Localization localization; \
-   Robotic_sys::perception::Perception perception;       \
-   Robotic_sys::control::Control control;                \
+#define INIT_COMPONENT()                                 \
+  Robotic_sys::localization::Localization localization;  \
+  Robotic_sys::perception::Perception perception;        \
+  Robotic_sys::control::Control control;                 \
+  Robotic_sys::common::StateMachine state_machine;       \
 
 INIT_COMPONENT();
 
@@ -59,21 +60,48 @@ void setup() {
   Robotic_sys::common::BuzzlePlayTone(300);
   
   Serial.println("init done!");
-
 }
 
 void loop() {
+  Result_state state = Result_state::State_Failed;
 
   unsigned long gray_scale[5];
   
-  Result_state state;
   state = perception.GetGrayScale(gray_scale);
 
-  for (int sensor_number = 0; sensor_number < 5; sensor_number++) {
-    Serial.print(gray_scale[sensor_number]);
-    Serial.print("   ");
-  }
-  Serial.println("   ");
+//  debug
+//  for (int sensor_number = 0; sensor_number < 5; sensor_number++) {
+//    Serial.print(gray_scale[sensor_number]);
+//    Serial.print("   ");
+//  }
+//  Serial.println("   ");
+  
 
-  state = control.Start();
+//  if(state_machine.Init == state_machine.state){
+//    control.GoFixedSpeed(20, 20);
+//    for (int sensor_number = 0; sensor_number < 5; sensor_number++) {
+//      if(gray_scale[sensor_number] > 2000){
+//        state_machine.is_black_frame_edge_detected_ = true;
+//      }
+//
+//      if((true == state_machine.is_black_frame_edge_detected_)&&(gray_scale[sensor_number] < 1500)){
+//        Robotic_sys::common::BuzzlePlayTone(300);
+//      }
+//    }
+//  }
+//
+//  if(state_machine.JoinTheLine == state_machine.state){
+//    control.GoFixedSpeed(20, 20);
+//    for (int sensor_number = 0; sensor_number < 5; sensor_number++) {
+//      if(gray_scale[sensor_number] > 2000){
+//        state_machine.is_black_line_detected_ = true;
+//        state_machine.state = state_machine.FollowTheLine;
+//        Robotic_sys::common::BuzzlePlayTone(300);
+//      }
+//    }
+//  }
+//
+//  if(state_machine.FollowTheLine == state_machine.state){
+//    control.BangBangControl(gray_scale);
+//  }
 }

@@ -30,9 +30,9 @@
 using Robotic_sys::common::Result_state;
 
 #define INIT_COMPONENT()                                       \
-  static Robotic_sys::localization::Localization localization; \
-  static Robotic_sys::perception::Perception perception;       \
-  static Robotic_sys::control::Control control;                \
+   Robotic_sys::localization::Localization localization; \
+   Robotic_sys::perception::Perception perception;       \
+   Robotic_sys::control::Control control;                \
 
 INIT_COMPONENT();
 
@@ -63,6 +63,17 @@ void setup() {
 }
 
 void loop() {
+
+  unsigned long gray_scale[5];
+  
   Result_state state;
-  state = perception.Start();
+  state = perception.GetGrayScale(gray_scale);
+
+  for (int sensor_number = 0; sensor_number < 5; sensor_number++) {
+    Serial.print(gray_scale[sensor_number]);
+    Serial.print("   ");
+  }
+  Serial.println("   ");
+
+  state = control.Start();
 }

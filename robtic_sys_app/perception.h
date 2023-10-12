@@ -51,16 +51,16 @@ class SensorAgent{
   
 };
 
-class Perception : public Robotic_sys::common::ConponentBase{
+class Perception{
  public:
 
-  const char* Name() const override;
+  const char* Name() const;
 
-  Result_state Init() override;
+  Result_state Init();
 
-  Result_state Start() override;
+  Result_state GetGrayScale(unsigned long* gray_scale);
 
-  void Stop() override;
+  void Stop();
 
   virtual ~Perception() = default;
 
@@ -68,7 +68,6 @@ class Perception : public Robotic_sys::common::ConponentBase{
 
   SensorAgent sensor_agent_;
 
-  unsigned long gray_scale_[5];
 };
 
 } // namespace perception

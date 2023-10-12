@@ -93,16 +93,9 @@ Result_state Perception::Init(){
   return Result_state::State_Ok;
 }
 
-Result_state Perception::Start(){
+Result_state Perception::GetGrayScale(unsigned long* gray_scale){
 
-  sensor_agent_.GetGrayscale(gray_scale_);
-
-  for (int sensor_number = 0; sensor_number < 5; sensor_number++) {
-    Serial.print(gray_scale_[sensor_number]);
-    Serial.print("   ");
-  }
-
-  Serial.println("   ");
+  sensor_agent_.GetGrayscale(gray_scale);
   
   return Result_state::State_Ok;
 }

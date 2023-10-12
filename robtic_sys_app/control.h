@@ -9,6 +9,20 @@ namespace control {
 
 using Robotic_sys::common::Result_state;
 
+class Motors{
+ public:
+  void Init();
+  
+  void SetMontorPower(int l_pwm, int r_pwm);
+
+ private:
+  // the setup function runs once when you press reset or power the board
+  const int motorSpeedPin1 = 9; // 电机1速度控制引脚
+  const int motorDirectionPin1 = 8; // 电机1方向控制引脚
+  const int motorSpeedPin2 = 10; // 电机2速度控制引脚
+  const int motorDirectionPin2 = 11; // 电机2方向控制引脚
+};
+
 class Control : public Robotic_sys::common::ConponentBase{
  public:
 
@@ -24,29 +38,13 @@ class Control : public Robotic_sys::common::ConponentBase{
 
  private:
 
-  Result_state ProduceControlCommand();
-  
-  
-  // the setup function runs once when you press reset or power the board
-  const int motorSpeedPin1 = 9; // 电机1速度控制引脚
-  const int motorDirectionPin1 = 8; // 电机1方向控制引脚
-  const int motorSpeedPin2 = 10; // 电机2速度控制引脚
-  const int motorDirectionPin2 = 11; // 电机2方向控制引脚
+  Motors motor_;
 
-//  Result_state Send_result();
+  Result_state ProduceControlCommand();
 
  protected:
   void ComputeLateralErrors();
 
-};
-
-class Motors{
- public:
-  void Init();
-  
-  void SetMontorPower(float l_pwm, float r_pwm){
-    
-  }
 };
 
 } // namespace control

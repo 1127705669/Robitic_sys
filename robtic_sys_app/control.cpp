@@ -40,6 +40,21 @@ void Motors::SetMontorPower(int left_pwm, int right_pwm){
   analogWrite(motor_right_speed_pin_, right_pwm);
 }
 
+void Control::Rotate(RotateType rotate_direction){
+  switch (rotate_direction) {
+    case CLOCKWISE:
+      motor_.SetMontorPower(20,-20);
+      break;
+
+    case ANTICLOCKWISE:
+      motor_.SetMontorPower(-20,20);
+      break;
+
+    default:
+      break;
+  }
+}
+
 const char* Control::Name() const { return "control"; }
 
 void Control::ComputeLateralErrors(){
@@ -103,7 +118,7 @@ Result_state Control::ProduceControlCommand(){
   return Result_state::State_Ok;
 }
 
-void Control::GoFixedSpeed(int left_pwm = 30, int right_pwm = 30){
+void Control::GoFixedSpeed(int left_pwm = 20, int right_pwm = 20){
   motor_.SetMontorPower(left_pwm, right_pwm);
 }
 

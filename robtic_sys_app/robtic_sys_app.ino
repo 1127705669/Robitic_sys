@@ -57,7 +57,7 @@ void setup() {
 
   Robotic_sys::common::BuzzleInit();
 
-  Robotic_sys::common::BuzzlePlayTone(300);
+  Robotic_sys::common::BuzzlePlayTone(500);
   
   Serial.println("init done!");
 }
@@ -75,33 +75,43 @@ void loop() {
     Serial.print("   ");
   }
   Serial.println("   ");
+  
   unsigned long max_gray_scale = perception.GetMaxScale();
 
-//  if(state_machine.Init == state_machine.state){
-//    control.GoFixedSpeed();
-//    for (int sensor_number = 0; sensor_number < 5; sensor_number++) {
-//      if(gray_scale[sensor_number] > 2000){
-//        state_machine.is_black_frame_edge_detected_ = true;
-//      }
-//
-//      if((true == state_machine.is_black_frame_edge_detected_)&&(gray_scale[sensor_number] < 1500)){
-//        Robotic_sys::common::BuzzlePlayTone(300);
-//      }
-//    }
-//  }
-//
-//  if(state_machine.JoinTheLine == state_machine.state){
-//    control.GoFixedSpeed(20, 20);
-//    for (int sensor_number = 0; sensor_number < 5; sensor_number++) {
-//      if(gray_scale[sensor_number] > 2000){
-//        state_machine.is_black_line_detected_ = true;
-//        state_machine.state = state_machine.FollowTheLine;
-//        Robotic_sys::common::BuzzlePlayTone(300);
-//      }
-//    }
-//  }
-//
-//  if(state_machine.FollowTheLine == state_machine.state){
-//    control.BangBangControl(gray_scale);
-//  }
+//  debug
+//  Serial.println(max_gray_scale);
+
+  if(state_machine.Init == state_machine.state){
+    control.GoFixedSpeed();
+    delay(1000);
+    state_machine.state = state_machine.JoinTheLine;
+  }
+
+  if(state_machine.JoinTheLine == state_machine.state){
+    int max_sensor_number = 0;
+    if((max_gray_scale > 2000)&&(true != state_machine.is_black_line_detected_)){
+      state_machine.is_black_line_detected_ = true;
+      Robotic_sys::common::BuzzlePlayTone(500);
+    }else if(true == state_machine.is_black_line_detected_){
+      control.Rotate(Robotic_sys::control::Control::ANTICLOCKWISE);
+    }else{
+      control.GoFixedSpeed();
+    }
+    
+    for (int sensor_number = 0; sensor_number < 5; sensor_number++) {
+      if(max_gray_scale == gray_scale[sensor_number]){
+        max_sensor_number = sensor_number;
+      }
+    }
+    if(2 == max_sensor_number){
+      state_machine.state = state_machine.FollowTheLine;
+    }
+  }
+
+  if(state_machine.FollowTheLine == state_machine.state){
+    control.BangBangControl(gray_scale);
+  }
+  
+
+  
 }

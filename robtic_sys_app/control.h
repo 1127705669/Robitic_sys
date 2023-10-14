@@ -26,6 +26,11 @@ class Motors{
 class Control{
  public:
 
+  enum RotateType {
+    CLOCKWISE,
+    ANTICLOCKWISE,
+  };
+
   const char* Name() const;
 
   Result_state Init();
@@ -34,7 +39,9 @@ class Control{
 
   void BangBangControl(unsigned long* gray_scale);
 
-  void GoFixedSpeed(int left_pwm = 30, int right_pwm = 30);
+  void GoFixedSpeed(int left_pwm = 20, int right_pwm = 20);
+
+  void Rotate(RotateType rotate_direction);
 
   void Stop();
 

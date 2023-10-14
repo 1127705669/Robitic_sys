@@ -109,8 +109,24 @@ void loop() {
   }
 
   if(state_machine.FollowTheLine == state_machine.state){
-    control.BangBangControl(gray_scale);
+    int max_sensor_number = 0;
+    for (int sensor_number = 0; sensor_number < 5; sensor_number++) {
+      if(max_gray_scale == gray_scale[sensor_number]){
+        max_sensor_number = sensor_number;
+      }
+    }
+    
+    if((max_gray_scale < 1100)&&(true != state_machine.is_turning_back)){
+      state_machine.is_turning_back = true;
+    }else if(true == state_machine.is_turning_back){
+      control.Rotate(Robotic_sys::control::Control::ANTICLOCKWISE);
+      if(2 == max_sensor_number){
+        state_machine.is_turning_back = false;
+      }
+    }else{
+      control.BangBangControl(gray_scale);
   }
+}
   
 
   

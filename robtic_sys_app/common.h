@@ -25,6 +25,7 @@ class StateMachine {
   bool is_black_frame_edge_detected_ = false;
   bool is_black_frame_edge_over_ = false;
   bool is_black_line_detected_ = false;
+  bool is_turning_back = false;
 };
 
 enum Result_state {

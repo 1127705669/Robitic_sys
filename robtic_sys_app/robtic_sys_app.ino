@@ -70,15 +70,15 @@ void loop() {
   state = perception.GetGrayScale(gray_scale);
 
 //  debug
-//  for (int sensor_number = 0; sensor_number < 5; sensor_number++) {
-//    Serial.print(gray_scale[sensor_number]);
-//    Serial.print("   ");
-//  }
-//  Serial.println("   ");
-  
+  for (int sensor_number = 0; sensor_number < 5; sensor_number++) {
+    Serial.print(gray_scale[sensor_number]);
+    Serial.print("   ");
+  }
+  Serial.println("   ");
+  unsigned long max_gray_scale = perception.GetMaxScale();
 
 //  if(state_machine.Init == state_machine.state){
-//    control.GoFixedSpeed(20, 20);
+//    control.GoFixedSpeed();
 //    for (int sensor_number = 0; sensor_number < 5; sensor_number++) {
 //      if(gray_scale[sensor_number] > 2000){
 //        state_machine.is_black_frame_edge_detected_ = true;

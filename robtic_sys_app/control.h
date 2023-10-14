@@ -13,7 +13,7 @@ class Motors{
  public:
   void Init();
   
-  void SetMontorPower(int left_pwm = 20, int right_pwm = 20);
+  void SetMontorPower(int left_pwm, int right_pwm);
 
  private:
   // the setup function runs once when you press reset or power the board
@@ -34,7 +34,7 @@ class Control{
 
   void BangBangControl(unsigned long* gray_scale);
 
-  void GoFixedSpeed(int left_pwm, int right_pwm);
+  void GoFixedSpeed(int left_pwm = 30, int right_pwm = 30);
 
   void Stop();
 

@@ -46,7 +46,7 @@ void SensorAgent::Reset(){
 }
 
 unsigned long SensorAgent::GetGrayscale(unsigned long* gray_scale){
-  unsigned long max_gray_scale;
+  unsigned long max_gray_scale = 0;
   
   for(int sensor_number = 0; sensor_number < sensor_number_; sensor_number++){
     pinMode(sensor_lists_[sensor_number].pin, OUTPUT);

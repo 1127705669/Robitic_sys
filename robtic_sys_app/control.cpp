@@ -21,7 +21,7 @@ void Motors::Init(){
   pinMode(motor_right_speed_pin_, OUTPUT);
 }
 
-void Motors::SetMontorPower(int left_pwm = 20, int right_pwm = 20){
+void Motors::SetMontorPower(int left_pwm, int right_pwm){
   if(0 < left_pwm){
     digitalWrite(motor_left_direction_pin_, LOW);
   }else{
@@ -103,7 +103,7 @@ Result_state Control::ProduceControlCommand(){
   return Result_state::State_Ok;
 }
 
-void Control::GoFixedSpeed(int left_pwm = 20, int right_pwm = 20){
+void Control::GoFixedSpeed(int left_pwm = 30, int right_pwm = 30){
   motor_.SetMontorPower(left_pwm, right_pwm);
 }
 

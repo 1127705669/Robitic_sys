@@ -116,16 +116,6 @@ bool Perception::IsAllBlank(){
      sensor_lists_[3].is_black_line_detected == true &&
      sensor_lists_[4].is_black_line_detected == true
     ){
-    delay(200);
-  }
-
-  if(
-     sensor_lists_[0].is_black_line_detected == true &&
-     sensor_lists_[1].is_black_line_detected == true &&
-     sensor_lists_[2].is_black_line_detected == true &&
-     sensor_lists_[3].is_black_line_detected == true &&
-     sensor_lists_[4].is_black_line_detected == true
-    ){
     is_black = true;
   }
   return is_black;

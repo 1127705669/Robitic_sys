@@ -44,10 +44,12 @@ void Control::Rotate(RotateType rotate_direction){
   switch (rotate_direction) {
     case CLOCKWISE:
       motor_.SetMontorPower(20,-20);
+      delay(200);
       break;
 
     case ANTICLOCKWISE:
       motor_.SetMontorPower(-20,20);
+      delay(200);
       break;
 
     default:
@@ -87,9 +89,9 @@ void Control::BangBangControl(unsigned long* gray_scale){
   }
 
   switch(sensor_nub){
-    case 0:
-      motor_.SetMontorPower(-25,25);
-      break;
+//    case 0:
+//      motor_.SetMontorPower(-25,25);
+//      break;
     case 1:
       motor_.SetMontorPower(10,25);
       break;
@@ -99,9 +101,9 @@ void Control::BangBangControl(unsigned long* gray_scale){
     case 3:
       motor_.SetMontorPower(25,10);
       break;
-    case 4:
-      motor_.SetMontorPower(25,-25);
-      break;
+//    case 4:
+//      motor_.SetMontorPower(25,-25);
+//      break;
     default:
       // nothing
       break;

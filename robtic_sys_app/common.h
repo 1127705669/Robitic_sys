@@ -13,14 +13,16 @@ namespace common {
 class StateMachine {
  public: 
   int state = Init;
-  
-  const int Init = 0;
-  const int JoinTheLine = 1;
-  const int FollowTheLine = 2;
-  const int NavigateCorners = 3;
-  const int NavigateIntersection = 4;
-  const int DetermineEnd = 5;
-  const int ReturnHome = 6;
+
+  enum StateType{
+    Init,
+    JoinTheLine,
+    FollowTheLine,
+    NavigateCorners,
+    NavigateIntersection,
+    DetermineEnd,
+    ReturnHome
+  };
 
   bool is_black_frame_edge_detected_ = false;
   bool is_black_frame_edge_over_ = false;

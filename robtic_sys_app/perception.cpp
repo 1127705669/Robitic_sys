@@ -12,28 +12,34 @@ namespace perception {
 
 using Robotic_sys::common::Result_state;
 
-Sensor::Init(int SensorPin) {
+Sensor::Init(int SensorPin, unsigned long threshold) {
   // Set line sensor pin to input
   pinMode(SensorPin, INPUT);
   pin = SensorPin;
+  threshold_ = threshold;
 }
 
 void Perception::Reset(){
   for (int sensor_number = 0; sensor_number < sensor_number_; sensor_number++) {
     sensor_lists_[sensor_number].is_updated_ = false;
+    sensor_lists_[sensor_number].is_black_line_detected = false;
   }
 }
 
-Result_state Perception::GetGrayScale(unsigned long* gray_scale){
+Result_state Perception::GetGrayScale(Sensor* sensor_lists){
+
+  // for find max sensor
   unsigned long max_gray_scale = 0;
-  
+
+  // set output of sensor
   for(int sensor_number = 0; sensor_number < sensor_number_; sensor_number++){
     pinMode(sensor_lists_[sensor_number].pin, OUTPUT);
     digitalWrite(sensor_lists_[sensor_number].pin, HIGH);
   }
   
   delayMicroseconds(sensor_charge_time_);
-  
+
+  // recieve data 
   for(int sensor_number = 0; sensor_number < sensor_number_; sensor_number++){
     pinMode(sensor_lists_[sensor_number].pin, INPUT);
   }
@@ -50,15 +56,21 @@ Result_state Perception::GetGrayScale(unsigned long* gray_scale){
         unsigned long current_time = micros();
         sensor_lists_[sensor_number].sensor_time_ = current_time - start_time;
         sensor_lists_[sensor_number].is_updated_ = true;
+        
         if(max_gray_scale < sensor_lists_[sensor_number].sensor_time_){
           max_gray_scale = sensor_lists_[sensor_number].sensor_time_;
+          max_sensor_index = sensor_number;
         }
       }
     }
   }
 
   for (int sensor_number = 0; sensor_number < sensor_number_; sensor_number++) {
-    gray_scale[sensor_number] = sensor_lists_[sensor_number].sensor_time_;
+    if(sensor_lists_[sensor_number].sensor_time_ > sensor_lists_[sensor_number].threshold_){
+      sensor_lists_[sensor_number].is_black_line_detected = true; 
+    }
+    
+    sensor_lists[sensor_number] = sensor_lists_[sensor_number];
   }
 
   Reset();
@@ -74,11 +86,11 @@ Result_state Perception::Init(){
   // Set some initial pin modes and states
   pinMode(emitPin, INPUT); // Set EMIT as an input (off)
 
-  sensor_lists_[0].Init(LineSensorPin_1);
-  sensor_lists_[1].Init(LineSensorPin_2);
-  sensor_lists_[2].Init(LineSensorPin_3);
-  sensor_lists_[3].Init(LineSensorPin_4);
-  sensor_lists_[4].Init(LineSensorPin_5);
+  sensor_lists_[0].Init(LineSensorPin_1, line_sensor_threshold_1_);
+  sensor_lists_[1].Init(LineSensorPin_2, line_sensor_threshold_2_);
+  sensor_lists_[2].Init(LineSensorPin_3, line_sensor_threshold_3_);
+  sensor_lists_[3].Init(LineSensorPin_4, line_sensor_threshold_4_);
+  sensor_lists_[4].Init(LineSensorPin_5, line_sensor_threshold_5_);
 
   pinMode(emitPin, OUTPUT);
   digitalWrite(emitPin, HIGH );
@@ -88,29 +100,29 @@ Result_state Perception::Init(){
   return Result_state::State_Ok;
 }
 
-unsigned long Perception::GetMaxScale(){
-  return max_gray_scale_;
+Sensor Perception::GetMaxSensor(){
+  return sensor_lists_[max_sensor_index];
 }
 
-bool Perception::IsBlank(){
+bool Perception::IsAllBlank(){
   bool is_black = false;
 
   if(
-     gray_scale_[0] < 1100 &&
-     gray_scale_[1] < 800 &&
-     gray_scale_[2] < 700 &&
-     gray_scale_[3] < 800 &&
-     gray_scale_[4] < 1100
+     sensor_lists_[0].is_black_line_detected == true &&
+     sensor_lists_[1].is_black_line_detected == true &&
+     sensor_lists_[2].is_black_line_detected == true &&
+     sensor_lists_[3].is_black_line_detected == true &&
+     sensor_lists_[4].is_black_line_detected == true
     ){
     delay(200);
   }
 
   if(
-     gray_scale_[0] < 1100 &&
-     gray_scale_[1] < 800 &&
-     gray_scale_[2] < 700 &&
-     gray_scale_[3] < 800 &&
-     gray_scale_[4] < 1100
+     sensor_lists_[0].is_black_line_detected == true &&
+     sensor_lists_[1].is_black_line_detected == true &&
+     sensor_lists_[2].is_black_line_detected == true &&
+     sensor_lists_[3].is_black_line_detected == true &&
+     sensor_lists_[4].is_black_line_detected == true
     ){
     is_black = true;
   }

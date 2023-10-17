@@ -27,6 +27,8 @@
 #include "perception.h"
 #include "control.h"
 
+#define SENSOR_NUM 5
+
 using Robotic_sys::common::Result_state;
 
 #define INIT_COMPONENT()                                 \
@@ -50,13 +52,13 @@ void setup() {
   if(Result_state::State_Ok != perception.Init()){
     Serial.println("perception init failed!");
   }
-
+  
   if(Result_state::State_Ok != control.Init()){
     Serial.println("control init failed!");
   }
-
+  
   Robotic_sys::common::BuzzleInit();
-
+  
   Robotic_sys::common::BuzzlePlayTone(500);
   
   Serial.println("init done!");
@@ -65,69 +67,68 @@ void setup() {
 void loop() {
   Result_state state = Result_state::State_Failed;
 
-  unsigned long gray_scale[5];
+  Robotic_sys::perception::Sensor sensor_lists[SENSOR_NUM];
   
-  state = perception.GetGrayScale(gray_scale);
+  state = perception.GetGrayScale(sensor_lists);
 
 //  debug
-  for (int sensor_number = 0; sensor_number < 5; sensor_number++) {
-    Serial.print(gray_scale[sensor_number]);
+  for (int sensor_number = 0; sensor_number < SENSOR_NUM; sensor_number++) {
+    Serial.print(sensor_lists[sensor_number].sensor_time_);
+    Serial.print(" ");
+    Serial.print(sensor_lists[sensor_number].is_black_line_detected);
     Serial.print("   ");
   }
   Serial.println("   ");
   
-  unsigned long max_gray_scale = perception.GetMaxScale();
+//  Sensor sensor = perception.GetMaxSensor();
 
-//  debug
-//  Serial.println(max_gray_scale);
-
-  if(state_machine.Init == state_machine.state){
-    control.GoFixedSpeed();
-    delay(1000);
-    state_machine.state = state_machine.JoinTheLine;
-  }
-
-  if(state_machine.JoinTheLine == state_machine.state){
-    int max_sensor_number = 0;
-    if((max_gray_scale > 2000)&&(true != state_machine.is_black_line_detected_)){
-      state_machine.is_black_line_detected_ = true;
-      Robotic_sys::common::BuzzlePlayTone(500);
-    }else if(true == state_machine.is_black_line_detected_){
-      control.Rotate(Robotic_sys::control::Control::ANTICLOCKWISE);
-    }else{
-      control.GoFixedSpeed();
-    }
-    
-    for (int sensor_number = 0; sensor_number < 5; sensor_number++) {
-      if(max_gray_scale == gray_scale[sensor_number]){
-        max_sensor_number = sensor_number;
-      }
-    }
-    if(2 == max_sensor_number){
-      state_machine.state = state_machine.FollowTheLine;
-    }
-  }
-
-  if(state_machine.FollowTheLine == state_machine.state){
-    int max_sensor_number = 0;
-    for (int sensor_number = 0; sensor_number < 5; sensor_number++) {
-      if(max_gray_scale == gray_scale[sensor_number]){
-        max_sensor_number = sensor_number;
-      }
-    }
-    
-    if((perception.IsBlank())&&(true != state_machine.is_turning_back)){
-      state_machine.is_turning_back = true;
-      control.GoFixedSpeed(15, 15);
-    }else if(true == state_machine.is_turning_back){
-      control.Rotate(Robotic_sys::control::Control::ANTICLOCKWISE);
-      if(2 == max_sensor_number){
-        state_machine.is_turning_back = false;
-      }
-    }else{
-      control.BangBangControl(gray_scale);
-    }
-  }
+//  if(state_machine.Init == state_machine.state){
+//    control.GoFixedSpeed();
+//    delay(1000);
+//    state_machine.state = state_machine.JoinTheLine;
+//  }
+//
+//  if(state_machine.JoinTheLine == state_machine.state){
+//    int max_sensor_number = 0;
+//    if((max_gray_scale > 2000)&&(true != state_machine.is_black_line_detected_)){
+//      state_machine.is_black_line_detected_ = true;
+//      Robotic_sys::common::BuzzlePlayTone(500);
+//    }else if(true == state_machine.is_black_line_detected_){
+//      control.Rotate(Robotic_sys::control::Control::ANTICLOCKWISE);
+//    }else{
+//      control.GoFixedSpeed();
+//    }
+//    
+//    for (int sensor_number = 0; sensor_number < SENSOR_NUM; sensor_number++) {
+////      if(max_gray_scale == gray_scale[sensor_number]){
+////        max_sensor_number = sensor_number;
+////      }
+//    }
+//    if(2 == max_sensor_number){
+//      state_machine.state = state_machine.FollowTheLine;
+//    }
+//  }
+//
+//  if(state_machine.FollowTheLine == state_machine.state){
+//    int max_sensor_number = 0;
+//    for (int sensor_number = 0; sensor_number < SENSOR_NUM; sensor_number++) {
+////      if(max_gray_scale == gray_scale[sensor_number]){
+////        max_sensor_number = sensor_number;
+////      }
+//    }
+//    
+//    if((perception.IsBlank())&&(true != state_machine.is_turning_back)){
+//      state_machine.is_turning_back = true;
+//      control.GoFixedSpeed(15, 15);
+//    }else if(true == state_machine.is_turning_back){
+//      control.Rotate(Robotic_sys::control::Control::ANTICLOCKWISE);
+//      if(2 == max_sensor_number){
+//        state_machine.is_turning_back = false;
+//      }
+//    }else{
+//      control.BangBangControl(gray_scale);
+//    }
+//  }
   
 
   

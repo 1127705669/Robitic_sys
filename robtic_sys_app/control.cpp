@@ -88,19 +88,19 @@ void Control::BangBangControl(unsigned long* gray_scale){
 
   switch(sensor_nub){
     case 0:
-      motor_.SetMontorPower(0,15);
+      motor_.SetMontorPower(-25,25);
       break;
     case 1:
-      motor_.SetMontorPower(8,15);
+      motor_.SetMontorPower(10,25);
       break;
     case 2:
-      motor_.SetMontorPower(15,15);
+      motor_.SetMontorPower(25,25);
       break;
     case 3:
-      motor_.SetMontorPower(15,8);
+      motor_.SetMontorPower(25,10);
       break;
     case 4:
-      motor_.SetMontorPower(15,0);
+      motor_.SetMontorPower(25,-25);
       break;
     default:
       // nothing

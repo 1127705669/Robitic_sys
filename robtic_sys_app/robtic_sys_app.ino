@@ -116,8 +116,9 @@ void loop() {
       }
     }
     
-    if((max_gray_scale < 1100)&&(true != state_machine.is_turning_back)){
+    if((perception.IsBlank())&&(true != state_machine.is_turning_back)){
       state_machine.is_turning_back = true;
+      control.GoFixedSpeed(15, 15);
     }else if(true == state_machine.is_turning_back){
       control.Rotate(Robotic_sys::control::Control::ANTICLOCKWISE);
       if(2 == max_sensor_number){

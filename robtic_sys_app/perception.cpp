@@ -102,11 +102,41 @@ Result_state Perception::Init(){
 Result_state Perception::GetGrayScale(unsigned long* gray_scale){
 
   max_gray_scale_ = sensor_agent_.GetGrayscale(gray_scale);
+
+  for (int sensor_number = 0; sensor_number < sensor_agent_.sensor_number_; sensor_number++) {
+    gray_scale_[sensor_number] = sensor_agent_.sensor_lists_[sensor_number].sensor_time_;
+  }
+  
   return Result_state::State_Ok;
 }
 
 unsigned long Perception::GetMaxScale(){
   return max_gray_scale_;
+}
+
+bool Perception::IsBlank(){
+  bool is_black = false;
+
+  if(
+     gray_scale_[0] < 1100 &&
+     gray_scale_[1] < 800 &&
+     gray_scale_[2] < 700 &&
+     gray_scale_[3] < 800 &&
+     gray_scale_[4] < 1100
+    ){
+    delay(200);
+  }
+
+  if(
+     gray_scale_[0] < 1100 &&
+     gray_scale_[1] < 800 &&
+     gray_scale_[2] < 700 &&
+     gray_scale_[3] < 800 &&
+     gray_scale_[4] < 1100
+    ){
+    is_black = true;
+  }
+  return is_black;
 }
 
 void Perception::Stop(){

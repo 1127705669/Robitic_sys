@@ -48,7 +48,7 @@ class ConponentBase {
 
 void BuzzleInit();
 
-void BuzzlePlayTone(int duration, int frequency = 1000);
+void BuzzlePlayTone(int duration = 200, int frequency = 800);
 
 } // namespace common
 } // namespace Robotic_sys

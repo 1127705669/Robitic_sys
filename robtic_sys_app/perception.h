@@ -26,6 +26,9 @@ class Sensor{
 
 class SensorAgent{
  public:
+  const int sensor_number_ = 5;
+  Sensor sensor_lists_[5];
+ 
   Result_state Init();
 
   unsigned long GetGrayscale(unsigned long* gray_scale);
@@ -42,10 +45,6 @@ class SensorAgent{
   const int LineSensorPin_4 = A3;
   const int LineSensorPin_5 = A4;
   
-  Sensor sensor_lists_[5];
-
-  const int sensor_number_ = 5;
-
   const int sensor_charge_time_ = 10;
 };
 
@@ -60,6 +59,8 @@ class Perception{
 
   unsigned long GetMaxScale();
 
+  bool IsBlank();
+
   void Stop();
 
   virtual ~Perception() = default;
@@ -68,6 +69,7 @@ class Perception{
 
   SensorAgent sensor_agent_;
   unsigned long max_gray_scale_;
+  unsigned long gray_scale_[5];
 
 };
 

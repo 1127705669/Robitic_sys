@@ -38,7 +38,7 @@ class Perception{
 
   Result_state GetGrayScale(Sensor* sensor_lists);
 
-  Sensor GetMaxSensor();
+  int GetMaxSensor();
 
   bool IsAllBlank();
 

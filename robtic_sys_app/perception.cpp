@@ -46,18 +46,20 @@ Result_state Perception::GetGrayScale(Sensor* sensor_lists){
   
   unsigned long start_time = micros();
   
-  while((digitalRead(sensor_lists_[0].pin) == HIGH) ||
-        (digitalRead(sensor_lists_[1].pin) == HIGH) ||
-        (digitalRead(sensor_lists_[2].pin) == HIGH) ||
-        (digitalRead(sensor_lists_[3].pin) == HIGH) ||
-        (digitalRead(sensor_lists_[4].pin) == HIGH)) {
+  while(
+        ((false == sensor_lists_[0].is_updated_)) ||
+        ((false == sensor_lists_[1].is_updated_)) ||
+        ((false == sensor_lists_[2].is_updated_)) ||
+        ((false == sensor_lists_[3].is_updated_)) ||
+        ((false == sensor_lists_[4].is_updated_))
+        ) {
     for (int sensor_number = 0; sensor_number < sensor_number_; sensor_number++) {
       if((false == sensor_lists_[sensor_number].is_updated_)&&(LOW == (digitalRead(sensor_lists_[sensor_number].pin)))){
         unsigned long current_time = micros();
         sensor_lists_[sensor_number].sensor_time_ = current_time - start_time;
         sensor_lists_[sensor_number].is_updated_ = true;
         
-        if(max_gray_scale < sensor_lists_[sensor_number].sensor_time_){
+        if(sensor_lists_[sensor_number].sensor_time_ > max_gray_scale){
           max_gray_scale = sensor_lists_[sensor_number].sensor_time_;
           max_sensor_index = sensor_number;
         }
@@ -100,8 +102,8 @@ Result_state Perception::Init(){
   return Result_state::State_Ok;
 }
 
-Sensor Perception::GetMaxSensor(){
-  return sensor_lists_[max_sensor_index];
+int Perception::GetMaxSensor(){
+  return max_sensor_index;
 }
 
 bool Perception::IsAllBlank(){

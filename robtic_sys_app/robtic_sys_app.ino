@@ -71,6 +71,8 @@ void loop() {
   
   state = perception.GetGrayScale(sensor_lists);
 
+  int max_sensor_index = perception.GetMaxSensor();
+
 //  debug
   for (int sensor_number = 0; sensor_number < SENSOR_NUM; sensor_number++) {
     Serial.print(sensor_lists[sensor_number].sensor_time_);
@@ -78,16 +80,16 @@ void loop() {
     Serial.print(sensor_lists[sensor_number].is_black_line_detected);
     Serial.print("   ");
   }
-  Serial.println("   ");
+  Serial.print(sensor_lists[max_sensor_index].sensor_time_);
   
-//  Sensor sensor = perception.GetMaxSensor();
+  Serial.println("   ");
 
-//  if(state_machine.Init == state_machine.state){
-//    control.GoFixedSpeed();
-//    delay(1000);
-//    state_machine.state = state_machine.JoinTheLine;
-//  }
-//
+  if(state_machine.Init == state_machine.state){
+    control.GoFixedSpeed();
+    delay(1000);
+    state_machine.state = state_machine.JoinTheLine;
+  }
+
 //  if(state_machine.JoinTheLine == state_machine.state){
 //    int max_sensor_number = 0;
 //    if((max_gray_scale > 2000)&&(true != state_machine.is_black_line_detected_)){
@@ -100,21 +102,21 @@ void loop() {
 //    }
 //    
 //    for (int sensor_number = 0; sensor_number < SENSOR_NUM; sensor_number++) {
-////      if(max_gray_scale == gray_scale[sensor_number]){
-////        max_sensor_number = sensor_number;
-////      }
+//      if(max_gray_scale == gray_scale[sensor_number]){
+//        max_sensor_number = sensor_number;
+//      }
 //    }
 //    if(2 == max_sensor_number){
 //      state_machine.state = state_machine.FollowTheLine;
 //    }
 //  }
-//
+
 //  if(state_machine.FollowTheLine == state_machine.state){
 //    int max_sensor_number = 0;
 //    for (int sensor_number = 0; sensor_number < SENSOR_NUM; sensor_number++) {
-////      if(max_gray_scale == gray_scale[sensor_number]){
-////        max_sensor_number = sensor_number;
-////      }
+//      if(max_gray_scale == gray_scale[sensor_number]){
+//        max_sensor_number = sensor_number;
+//      }
 //    }
 //    
 //    if((perception.IsBlank())&&(true != state_machine.is_turning_back)){

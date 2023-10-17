@@ -15,27 +15,35 @@ using Robotic_sys::common::Result_state;
 
 class Sensor{
  public:
-  Sensor();
 
   Init(int SensorPin);
 
   int pin;
   bool is_updated_ = false;
   unsigned long sensor_time_ = 0;
+  char sensor_name;
 };
 
-class SensorAgent{
+class Perception{
  public:
-  const int sensor_number_ = 5;
-  Sensor sensor_lists_[5];
- 
-  Result_state Init();
 
-  unsigned long GetGrayscale(unsigned long* gray_scale);
+  const char* Name() const;
+
+  Result_state Init();
 
   void Reset();
 
+  void Stop();
+
+  Result_state GetGrayScale(unsigned long* gray_scale);
+
+  unsigned long GetMaxScale();
+
+  bool IsBlank();
+
  private:
+  static const int sensor_number_ = 5;
+  
   const int emitPin = 11;
   const int threshold = 2000;
   
@@ -46,31 +54,11 @@ class SensorAgent{
   const int LineSensorPin_5 = A4;
   
   const int sensor_charge_time_ = 10;
-};
 
-class Perception{
- public:
-
-  const char* Name() const;
-
-  Result_state Init();
-
-  Result_state GetGrayScale(unsigned long* gray_scale);
-
-  unsigned long GetMaxScale();
-
-  bool IsBlank();
-
-  void Stop();
-
-  virtual ~Perception() = default;
-
- private:
-
-  SensorAgent sensor_agent_;
   unsigned long max_gray_scale_;
-  unsigned long gray_scale_[5];
-
+  unsigned long gray_scale_[sensor_number_];
+  Sensor sensor_lists_[sensor_number_];
+  
 };
 
 } // namespace perception

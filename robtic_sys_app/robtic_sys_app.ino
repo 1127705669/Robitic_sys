@@ -126,8 +126,8 @@ void loop() {
       }
     }else{
       control.BangBangControl(gray_scale);
+    }
   }
-}
   
 
   

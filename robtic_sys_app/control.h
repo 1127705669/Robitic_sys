@@ -3,6 +3,7 @@
  *****************************************************************************/
 
 #include "common.h"
+#include "perception.h"
 
 namespace Robotic_sys {
 namespace control {
@@ -37,7 +38,7 @@ class Control{
 
   Result_state Start();
 
-  void BangBangControl(unsigned long* gray_scale);
+  void BangBangControl(Robotic_sys::perception::Sensor* sensor_lists);
 
   void GoFixedSpeed(int left_pwm = 20, int right_pwm = 20);
 
@@ -52,6 +53,10 @@ class Control{
   Motors motor_;
 
   Result_state ProduceControlCommand();
+
+  const int BiasPWM = 18;
+
+  const int MaxTurnPWM = 7;
 
  protected:
   void ComputeLateralErrors();

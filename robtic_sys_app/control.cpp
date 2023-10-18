@@ -78,36 +78,41 @@ Result_state Control::Start(){
  return Result_state::State_Ok;
 }
 
-void Control::BangBangControl(unsigned long* gray_scale){
-  unsigned long gray_scale_max = 0;
-  int sensor_nub = 0;
-  for (int sensor_number = 0; sensor_number < 5; sensor_number++) {
-    if(gray_scale[sensor_number] > gray_scale_max){
-      gray_scale_max = gray_scale[sensor_number];
-      sensor_nub = sensor_number;
-    }
-  }
+void Control::BangBangControl(Robotic_sys::perception::Sensor* sensor_lists){
+  int left_speed = BiasPWM + (sensor_lists[3].gray_scale_*MaxTurnPWM)/100;
+  int right_speed = BiasPWM + (sensor_lists[1].gray_scale_*MaxTurnPWM)/100;
 
-  switch(sensor_nub){
+  motor_.SetMontorPower(left_speed, right_speed);
+//  unsigned long gray_scale_max = 0;
+//  int sensor_nub = 0;
+//  for (int sensor_number = 0; sensor_number < 5; sensor_number++) {
+//    if(gray_scale[sensor_number] > gray_scale_max){
+//      gray_scale_max = gray_scale[sensor_number];
+//      sensor_nub = sensor_number;
+//    }
+//  }
+//
+//  switch(sensor_nub){
 //    case 0:
 //      motor_.SetMontorPower(-25,25);
 //      break;
-    case 1:
-      motor_.SetMontorPower(10,25);
-      break;
-    case 2:
-      motor_.SetMontorPower(25,25);
-      break;
-    case 3:
-      motor_.SetMontorPower(25,10);
-      break;
+//    case 1:
+//      motor_.SetMontorPower(10,25);
+//      break;
+//    case 2:
+//      motor_.SetMontorPower(25,25);
+//      break;
+//    case 3:
+//      motor_.SetMontorPower(25,10);
+//      break;
 //    case 4:
 //      motor_.SetMontorPower(25,-25);
 //      break;
-    default:
-      // nothing
-      break;
-  }
+//    default:
+//      // nothing
+//      break;
+//  }
+  
 }
 
 void Control::Stop(){

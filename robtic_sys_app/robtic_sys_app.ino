@@ -126,7 +126,7 @@ void loop() {
         state_machine.is_turning_back = false;
       }
     }else{
-      control.BangBangControl(gray_scale);
+      control.BangBangControl(sensor_lists);
     }
   }
 

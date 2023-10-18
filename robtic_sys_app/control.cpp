@@ -79,8 +79,8 @@ Result_state Control::Start(){
 }
 
 void Control::BangBangControl(Robotic_sys::perception::Sensor* sensor_lists){
-  int left_speed = BiasPWM + (sensor_lists[3].gray_scale_*MaxTurnPWM)/100;
-  int right_speed = BiasPWM + (sensor_lists[1].gray_scale_*MaxTurnPWM)/100;
+  int left_speed = BiasPWM + (sensor_lists[3].gray_scale_*MaxTurnPWM)/100 -(sensor_lists[1].gray_scale_*MaxTurnPWM)/100;
+  int right_speed = BiasPWM + (sensor_lists[1].gray_scale_*MaxTurnPWM)/100 - (sensor_lists[3].gray_scale_*MaxTurnPWM)/100;
 
   motor_.SetMontorPower(left_speed, right_speed);
 //  unsigned long gray_scale_max = 0;

@@ -71,16 +71,16 @@ void loop() {
   
   state = perception.GetGrayScale(sensor_lists);
 
-  int max_sensor_index = perception.GetMaxSensor();
+//  int max_sensor_index = perception.GetMaxSensor();
 
 //  debug
   for (int sensor_number = 0; sensor_number < SENSOR_NUM; sensor_number++) {
     Serial.print(sensor_lists[sensor_number].sensor_time_);
     Serial.print(" ");
-    Serial.print(sensor_lists[sensor_number].is_black_line_detected);
+    Serial.print(sensor_lists[sensor_number].gray_scale_);
     Serial.print("   ");
   }
-  Serial.print(sensor_lists[max_sensor_index].sensor_time_);
+//  Serial.print(sensor_lists[max_sensor_index].sensor_time_);
   
   Serial.println("   ");
 

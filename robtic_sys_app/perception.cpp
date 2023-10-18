@@ -12,11 +12,12 @@ namespace perception {
 
 using Robotic_sys::common::Result_state;
 
-Sensor::Init(int SensorPin, unsigned long threshold) {
+Sensor::Init(int SensorPin, unsigned long blank_threshold, unsigned long black_line_threshold) {
   // Set line sensor pin to input
   pinMode(SensorPin, INPUT);
   pin = SensorPin;
-  threshold_ = threshold;
+  blank_threshold_ = blank_threshold;
+  black_line_threshold_ = black_line_threshold;
 }
 
 void Perception::Reset(){
@@ -58,6 +59,17 @@ Result_state Perception::GetGrayScale(Sensor* sensor_lists){
         unsigned long current_time = micros();
         sensor_lists_[sensor_number].sensor_time_ = current_time - start_time;
         sensor_lists_[sensor_number].is_updated_ = true;
+
+        sensor_lists_[sensor_number].gray_scale_ = (int)100*((float)(sensor_lists_[sensor_number].sensor_time_ - sensor_lists_[sensor_number].blank_threshold_)/
+        (float)(sensor_lists_[sensor_number].black_line_threshold_ - sensor_lists_[sensor_number].blank_threshold_));
+
+        if(sensor_lists_[sensor_number].black_line_threshold_ < sensor_lists_[sensor_number].sensor_time_){
+          sensor_lists_[sensor_number].gray_scale_ = 100;   
+        }
+
+        if(sensor_lists_[sensor_number].blank_threshold_ > sensor_lists_[sensor_number].sensor_time_){
+          sensor_lists_[sensor_number].gray_scale_ = 0;   
+        }
         
         if(sensor_lists_[sensor_number].sensor_time_ > max_gray_scale){
           max_gray_scale = sensor_lists_[sensor_number].sensor_time_;
@@ -68,7 +80,7 @@ Result_state Perception::GetGrayScale(Sensor* sensor_lists){
   }
 
   for (int sensor_number = 0; sensor_number < sensor_number_; sensor_number++) {
-    if(sensor_lists_[sensor_number].sensor_time_ > sensor_lists_[sensor_number].threshold_){
+    if(sensor_lists_[sensor_number].sensor_time_ > sensor_lists_[sensor_number].black_line_threshold_){
       sensor_lists_[sensor_number].is_black_line_detected = true; 
     }
     
@@ -88,11 +100,11 @@ Result_state Perception::Init(){
   // Set some initial pin modes and states
   pinMode(emitPin, INPUT); // Set EMIT as an input (off)
 
-  sensor_lists_[0].Init(LineSensorPin_1, line_sensor_threshold_1_);
-  sensor_lists_[1].Init(LineSensorPin_2, line_sensor_threshold_2_);
-  sensor_lists_[2].Init(LineSensorPin_3, line_sensor_threshold_3_);
-  sensor_lists_[3].Init(LineSensorPin_4, line_sensor_threshold_4_);
-  sensor_lists_[4].Init(LineSensorPin_5, line_sensor_threshold_5_);
+  sensor_lists_[0].Init(LineSensorPin_1, blank_threshold_1_, black_line_threshold_1_);
+  sensor_lists_[1].Init(LineSensorPin_2, blank_threshold_2_, black_line_threshold_2_);
+  sensor_lists_[2].Init(LineSensorPin_3, blank_threshold_3_, black_line_threshold_3_);
+  sensor_lists_[3].Init(LineSensorPin_4, blank_threshold_4_, black_line_threshold_4_);
+  sensor_lists_[4].Init(LineSensorPin_5, blank_threshold_5_, black_line_threshold_5_);
 
   pinMode(emitPin, OUTPUT);
   digitalWrite(emitPin, HIGH );

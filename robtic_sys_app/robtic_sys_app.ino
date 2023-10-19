@@ -1,26 +1,4 @@
-/*
-  Blink
 
-  Turns an LED on for one second, then off for one second, repeatedly.
-
-  Most Arduinos have an on-board LED you can control. On the UNO, MEGA and ZERO
-  it is attached to digital pin 13, on MKR1000 on pin 6. LED_BUILTIN is set to
-  the correct LED pin independent of which board is used.
-  If you want to know what pin the on-board LED is connected to on your Arduino
-  model, check the Technical Specs of your board at:
-  https://www.arduino.cc/en/Main/Products
-
-  modified 8 May 2014
-  by Scott Fitzgerald
-  modified 2 Sep 2016
-  by Arturo Guadalupi
-  modified 8 Sep 2016
-  by Colby Newman
-
-  This example code is in the public domain.
-
-  http://www.arduino.cc/en/Tutorial/Blink
-*/
 
 #include "common.h"
 #include "localization.h"
@@ -69,8 +47,6 @@ void loop() {
   
   state = perception.GetGrayScale(sensor_lists);
 
-//  int max_sensor_index = perception.GetMaxSensor();
-
 //  debug
   for (int sensor_number = 0; sensor_number < SENSOR_NUM; sensor_number++) {
     Serial.print(sensor_lists[sensor_number].sensor_time_);
@@ -78,7 +54,6 @@ void loop() {
     Serial.print(sensor_lists[sensor_number].gray_scale_);
     Serial.print("   ");
   }
-//  Serial.print(sensor_lists[max_sensor_index].sensor_time_);
   
   Serial.println("   ");
 
@@ -94,40 +69,31 @@ void loop() {
 
     if(state_machine.is_black_frame_edge_over_){
       state_machine.state = state_machine.JoinTheLine;
-      Robotic_sys::common::BuzzlePlayTone(300,500);
+      Robotic_sys::common::BuzzlePlayTone(300);
     }
   }
 
   if(state_machine.JoinTheLine == state_machine.state){
-    
-    if((sensor_lists[SENSOR_DN1].gray_scale_ > 90)&&(false == state_machine.is_black_line_detected_)){
+    if((sensor_lists[SENSOR_DN1].gray_scale_ > 90)&&(!state_machine.is_black_line_detected_)){
       state_machine.is_black_line_detected_ = true;
     }else if(state_machine.is_black_line_detected_){
       control.Rotate(Robotic_sys::control::Control::ANTICLOCKWISE);
-      if((sensor_lists[SENSOR_DN4].gray_scale_ > 90) && (sensor_lists[SENSOR_DN1].gray_scale_ < 60)){
+      if((sensor_lists[SENSOR_DN4].gray_scale_ > 90) && (sensor_lists[SENSOR_DN1].gray_scale_ < 50)){
         state_machine.state = state_machine.FollowTheLine;
       }
     }else{
       control.GoFixedSpeed();
     }
-    
-    
   }
 
   if(state_machine.FollowTheLine == state_machine.state){
-
-    if(sensor_lists[SENSOR_DN1].is_black_line_detected_ || sensor_lists[SENSOR_DN5].is_black_line_detected_){
+    if((sensor_lists[SENSOR_DN1].is_black_line_detected_) || 
+       ((sensor_lists[SENSOR_DN5].is_black_line_detected_)&&(sensor_lists[SENSOR_DN3].gray_scale_ < 50))){
       state_machine.state = state_machine.NavigateCorners;
     }
-//    
-//    unsigned long gray_scale[5];
-//    for (int sensor_number = 0; sensor_number < SENSOR_NUM; sensor_number++) {
-//      gray_scale[sensor_number] = sensor_lists[sensor_number].sensor_time_;
-//    }
-//
+    
     if((perception.IsAllBlank())&&(!state_machine.is_turning_back)){
       state_machine.is_turning_back = true;
-      control.GoFixedSpeed(15, 15);
     }else if(state_machine.is_turning_back){
       control.Rotate(Robotic_sys::control::Control::ANTICLOCKWISE);
       if(sensor_lists[SENSOR_DN2].gray_scale_ > 80){
@@ -139,19 +105,29 @@ void loop() {
   }
 
   if(state_machine.NavigateCorners == state_machine.state){
-    if((sensor_lists[SENSOR_DN1].is_black_line_detected_)&&(!state_machine.is_turning_)){
+    if((sensor_lists[SENSOR_DN1].is_black_line_detected_)&&(!state_machine.is_turning_left_)){
+      state_machine.is_turning_left_ = true;
+    }else if(state_machine.is_turning_left_){
       control.Rotate(Robotic_sys::control::Control::ANTICLOCKWISE);
-      state_machine.is_turning_ = true;
       if(sensor_lists[SENSOR_DN3].gray_scale_ > 80){
         state_machine.state = state_machine.FollowTheLine;
-        state_machine.is_turning_ = false;
+        state_machine.is_turning_left_ = false;
       }
-    }else if((sensor_lists[SENSOR_DN5].is_black_line_detected_)&&(!state_machine.is_turning_)){
+      state_machine.is_turning_right_ = false;
+    }
+    
+    if((sensor_lists[SENSOR_DN5].is_black_line_detected_)&&(!state_machine.is_turning_right_)){
+      state_machine.is_turning_right_ = true;
+    }else if(state_machine.is_turning_right_ ){
       control.Rotate(Robotic_sys::control::Control::CLOCKWISE);
-      state_machine.is_turning_ = true;
-      if(sensor_lists[SENSOR_DN3].gray_scale_ > 80){
-        state_machine.state = state_machine.FollowTheLine;
-        state_machine.is_turning_ = false;
+      if(sensor_lists[SENSOR_DN1].is_black_line_detected_){
+        state_machine.is_turning_left_ = true;
+        state_machine.is_turning_right_ = false;
+      }else{
+        if(sensor_lists[SENSOR_DN3].gray_scale_ > 80){
+          state_machine.state = state_machine.FollowTheLine;
+          state_machine.is_turning_right_ = false;
+        }
       }
     }
   }

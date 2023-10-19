@@ -62,11 +62,11 @@ class Perception{
   const unsigned long blank_threshold_4_ = 800;
   const unsigned long blank_threshold_5_ = 1050;
 
-  const unsigned long black_line_threshold_1_ = 2700;
+  const unsigned long black_line_threshold_1_ = 2500;
   const unsigned long black_line_threshold_2_ = 2600;
-  const unsigned long black_line_threshold_3_ = 1800;
+  const unsigned long black_line_threshold_3_ = 1650;
   const unsigned long black_line_threshold_4_ = 2200;
-  const unsigned long black_line_threshold_5_ = 2700;
+  const unsigned long black_line_threshold_5_ = 2500;
   
   int max_sensor_index = 0;
   Sensor sensor_lists_[sensor_number_];

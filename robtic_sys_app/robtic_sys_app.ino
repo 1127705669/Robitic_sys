@@ -87,15 +87,18 @@ void loop() {
   }
 
   if(state_machine.FollowTheLine == state_machine.state){
-    if((sensor_lists[SENSOR_DN1].is_black_line_detected_) || 
-       ((sensor_lists[SENSOR_DN5].is_black_line_detected_)&&(sensor_lists[SENSOR_DN3].gray_scale_ < 50))){
+    if(sensor_lists[SENSOR_DN1].is_black_line_detected_){
+      state_machine.state = state_machine.NavigateCorners;
+    }
+
+    if((sensor_lists[SENSOR_DN5].is_black_line_detected_)&&(sensor_lists[SENSOR_DN3].gray_scale_ < 50)){
       state_machine.state = state_machine.NavigateCorners;
     }
     
     if((perception.IsAllBlank())&&(!state_machine.is_turning_back)){
       state_machine.is_turning_back = true;
     }else if(state_machine.is_turning_back){
-      control.Rotate(Robotic_sys::control::Control::ANTICLOCKWISE);
+      control.Rotate(Robotic_sys::control::Control::CLOCKWISE);
       if(sensor_lists[SENSOR_DN2].gray_scale_ > 80){
         state_machine.is_turning_back = false;
       }
@@ -109,14 +112,14 @@ void loop() {
       state_machine.is_turning_left_ = true;
     }else if(state_machine.is_turning_left_){
       control.Rotate(Robotic_sys::control::Control::ANTICLOCKWISE);
-      if(sensor_lists[SENSOR_DN3].gray_scale_ > 80){
+      if(sensor_lists[SENSOR_DN3].gray_scale_ > 60){
         state_machine.state = state_machine.FollowTheLine;
         state_machine.is_turning_left_ = false;
       }
       state_machine.is_turning_right_ = false;
     }
     
-    if((sensor_lists[SENSOR_DN5].is_black_line_detected_)&&(!state_machine.is_turning_right_)){
+    if((sensor_lists[SENSOR_DN5].is_black_line_detected_)&&(!state_machine.is_turning_right_)&&(sensor_lists[SENSOR_DN3].gray_scale_ < 50)){
       state_machine.is_turning_right_ = true;
     }else if(state_machine.is_turning_right_ ){
       control.Rotate(Robotic_sys::control::Control::CLOCKWISE);

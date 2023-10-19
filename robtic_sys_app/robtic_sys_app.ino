@@ -27,8 +27,6 @@
 #include "perception.h"
 #include "control.h"
 
-#define SENSOR_NUM 5
-
 using Robotic_sys::common::Result_state;
 
 #define INIT_COMPONENT()                                 \
@@ -86,43 +84,53 @@ void loop() {
 
   if(state_machine.Init == state_machine.state){
     control.GoFixedSpeed();
-    delay(1000);
-    state_machine.state = state_machine.JoinTheLine;
+    if(sensor_lists[SENSOR_DN3].is_black_line_detected_){
+      state_machine.is_black_frame_edge_detected_ = true;
+    }
+    
+    if((state_machine.is_black_frame_edge_detected_)&&(perception.IsAllBlank())){
+      state_machine.is_black_frame_edge_over_ = true;
+    }
+
+    if(state_machine.is_black_frame_edge_over_){
+      state_machine.state = state_machine.JoinTheLine;
+      Robotic_sys::common::BuzzlePlayTone(300,500);
+    }
   }
 
   if(state_machine.JoinTheLine == state_machine.state){
     
-    if((!perception.IsAllBlank())&&(!state_machine.is_black_line_detected_)){
+    if((sensor_lists[SENSOR_DN1].gray_scale_ > 90)&&(false == state_machine.is_black_line_detected_)){
       state_machine.is_black_line_detected_ = true;
-      Robotic_sys::common::BuzzlePlayTone(300);
-    }else if(true == state_machine.is_black_line_detected_){
+    }else if(state_machine.is_black_line_detected_){
       control.Rotate(Robotic_sys::control::Control::ANTICLOCKWISE);
+      if((sensor_lists[SENSOR_DN4].gray_scale_ > 90) && (sensor_lists[SENSOR_DN1].gray_scale_ < 60)){
+        state_machine.state = state_machine.FollowTheLine;
+      }
     }else{
       control.GoFixedSpeed();
     }
     
-    if(sensor_lists[2].is_black_line_detected){
-      state_machine.state = state_machine.FollowTheLine;
-    }
+    
   }
 
   if(state_machine.FollowTheLine == state_machine.state){
 
-    if(sensor_lists[0].is_black_line_detected || sensor_lists[4].is_black_line_detected){
+    if(sensor_lists[SENSOR_DN1].is_black_line_detected_ || sensor_lists[SENSOR_DN5].is_black_line_detected_){
       state_machine.state = state_machine.NavigateCorners;
     }
-    
-    unsigned long gray_scale[5];
-    for (int sensor_number = 0; sensor_number < SENSOR_NUM; sensor_number++) {
-      gray_scale[sensor_number] = sensor_lists[sensor_number].sensor_time_;
-    }
-
+//    
+//    unsigned long gray_scale[5];
+//    for (int sensor_number = 0; sensor_number < SENSOR_NUM; sensor_number++) {
+//      gray_scale[sensor_number] = sensor_lists[sensor_number].sensor_time_;
+//    }
+//
     if((perception.IsAllBlank())&&(!state_machine.is_turning_back)){
       state_machine.is_turning_back = true;
       control.GoFixedSpeed(15, 15);
     }else if(state_machine.is_turning_back){
       control.Rotate(Robotic_sys::control::Control::ANTICLOCKWISE);
-      if(sensor_lists[2].is_black_line_detected){
+      if(sensor_lists[SENSOR_DN2].gray_scale_ > 80){
         state_machine.is_turning_back = false;
       }
     }else{
@@ -131,10 +139,19 @@ void loop() {
   }
 
   if(state_machine.NavigateCorners == state_machine.state){
-    if(sensor_lists[0].is_black_line_detected){
+    if((sensor_lists[SENSOR_DN1].is_black_line_detected_)&&(!state_machine.is_turning_)){
       control.Rotate(Robotic_sys::control::Control::ANTICLOCKWISE);
-      if(sensor_lists[2].is_black_line_detected){
+      state_machine.is_turning_ = true;
+      if(sensor_lists[SENSOR_DN3].gray_scale_ > 80){
         state_machine.state = state_machine.FollowTheLine;
+        state_machine.is_turning_ = false;
+      }
+    }else if((sensor_lists[SENSOR_DN5].is_black_line_detected_)&&(!state_machine.is_turning_)){
+      control.Rotate(Robotic_sys::control::Control::CLOCKWISE);
+      state_machine.is_turning_ = true;
+      if(sensor_lists[SENSOR_DN3].gray_scale_ > 80){
+        state_machine.state = state_machine.FollowTheLine;
+        state_machine.is_turning_ = false;
       }
     }
   }

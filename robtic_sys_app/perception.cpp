@@ -23,7 +23,7 @@ Sensor::Init(int SensorPin, unsigned long blank_threshold, unsigned long black_l
 void Perception::Reset(){
   for (int sensor_number = 0; sensor_number < sensor_number_; sensor_number++) {
     sensor_lists_[sensor_number].is_updated_ = false;
-    sensor_lists_[sensor_number].is_black_line_detected = false;
+    sensor_lists_[sensor_number].is_black_line_detected_ = false;
   }
 }
 
@@ -81,7 +81,7 @@ Result_state Perception::GetGrayScale(Sensor* sensor_lists){
 
   for (int sensor_number = 0; sensor_number < sensor_number_; sensor_number++) {
     if(sensor_lists_[sensor_number].sensor_time_ > sensor_lists_[sensor_number].black_line_threshold_){
-      sensor_lists_[sensor_number].is_black_line_detected = true; 
+      sensor_lists_[sensor_number].is_black_line_detected_ = true; 
     }
     
     sensor_lists[sensor_number] = sensor_lists_[sensor_number];
@@ -122,11 +122,11 @@ bool Perception::IsAllBlank(){
   bool is_black = false;
 
   if(
-     sensor_lists_[0].is_black_line_detected == true &&
-     sensor_lists_[1].is_black_line_detected == true &&
-     sensor_lists_[2].is_black_line_detected == true &&
-     sensor_lists_[3].is_black_line_detected == true &&
-     sensor_lists_[4].is_black_line_detected == true
+     sensor_lists_[SENSOR_DN1].gray_scale_ == 0 &&
+     sensor_lists_[SENSOR_DN2].gray_scale_ == 0 &&
+     sensor_lists_[SENSOR_DN3].gray_scale_ == 0 &&
+     sensor_lists_[SENSOR_DN4].gray_scale_ == 0 &&
+     sensor_lists_[SENSOR_DN5].gray_scale_ == 0
     ){
     is_black = true;
   }

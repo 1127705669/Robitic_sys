@@ -44,12 +44,10 @@ void Control::Rotate(RotateType rotate_direction){
   switch (rotate_direction) {
     case CLOCKWISE:
       motor_.SetMontorPower(20,-20);
-      delay(200);
       break;
 
     case ANTICLOCKWISE:
       motor_.SetMontorPower(-20,20);
-      delay(200);
       break;
 
     default:

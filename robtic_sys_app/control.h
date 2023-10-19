@@ -54,7 +54,7 @@ class Control{
 
   Result_state ProduceControlCommand();
 
-  const int BiasPWM = 22;
+  const int BiasPWM = 20;
 
   const int MaxTurnPWM = 10;
 

@@ -7,6 +7,13 @@
 #include <Arduino.h>
 #include <string.h>
 
+#define SENSOR_NUM 5
+#define SENSOR_DN1 0
+#define SENSOR_DN2 1
+#define SENSOR_DN3 2
+#define SENSOR_DN4 3
+#define SENSOR_DN5 4
+
 namespace Robotic_sys {
 namespace common {
 
@@ -28,6 +35,7 @@ class StateMachine {
   bool is_black_frame_edge_over_ = false;
   bool is_black_line_detected_ = false;
   bool is_turning_back = false;
+  bool is_turning_ = false;
 };
 
 enum Result_state {

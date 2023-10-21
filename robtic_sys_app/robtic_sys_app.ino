@@ -4,6 +4,7 @@
 #include "localization.h"
 #include "perception.h"
 #include "control.h"
+#include "encoders.h"
 
 using Robotic_sys::common::Result_state;
 
@@ -34,6 +35,10 @@ void setup() {
   }
   
   Robotic_sys::common::BuzzleInit();
+
+  setupEncoder0();
+  
+  setupEncoder1();
   
   Robotic_sys::common::BuzzlePlayTone(300);
   
@@ -48,14 +53,16 @@ void loop() {
   state = perception.GetGrayScale(sensor_lists);
 
 //  debug
-  for (int sensor_number = 0; sensor_number < SENSOR_NUM; sensor_number++) {
-    Serial.print(sensor_lists[sensor_number].sensor_time_);
-    Serial.print(" ");
-    Serial.print(sensor_lists[sensor_number].gray_scale_);
-    Serial.print("   ");
-  }
-  
-  Serial.println("   ");
+//  for (int sensor_number = 0; sensor_number < SENSOR_NUM; sensor_number++) {
+//    Serial.print(sensor_lists[sensor_number].sensor_time_);
+//    Serial.print(" ");
+//    Serial.print(sensor_lists[sensor_number].gray_scale_);
+//    Serial.print("   ");
+//  }
+//  
+//  Serial.println("   ");
+
+  Serial.println(count_e0/358.3);
 
   if(state_machine.Init == state_machine.state){
     control.GoFixedSpeed();

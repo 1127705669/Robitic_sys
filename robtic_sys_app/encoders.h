@@ -4,6 +4,8 @@
 #define ENCODER_0_A_PIN  7
 #define ENCODER_0_B_PIN  23
 #define ENCODER_1_A_PIN  26
+#define GEAR_RATIO 358.3
+#define RADIUS 16
 //#define ENCODER_1_B_PIN Non-standard pin!
 
 
@@ -13,7 +15,17 @@ volatile byte state_e0;
 volatile long count_e1;
 volatile byte state_e1;
 
+enum direction_type{
+  FORWARD,
+  BACKWARD,
+  NON
+};
 
+direction_type last_direction = NON;
+long counter = 0;
+unsigned long start_time = 0;
+long start_count_e0;
+double left_wheel_speed;
 
 // This ISR handles just Encoder 0
 // ISR to read the Encoder0 Channel A and B pins
@@ -28,7 +40,9 @@ ISR( INT6_vect ) {
   // Standard pins, so standard read functions.
   boolean e0_B = digitalRead( ENCODER_0_B_PIN ); // normal B state
   boolean e0_A = digitalRead( ENCODER_0_A_PIN ); // XOR(AB)
- 
+
+  direction_type current_direction;
+  
   // Software XOR (^) logically infers
   // the true value of A given the state of B
   e0_A = e0_A ^ e0_B;
@@ -43,36 +57,71 @@ ISR( INT6_vect ) {
     // Handle which transition we have registered.
     // Complete this if statement as necessary.
     // Refer to the labsheet. 
-    Serial.println(state_e0);
+
+    if(0 == counter){
+      start_time = micros();
+    }
+    
+    unsigned long current_time = micros();
+    
     switch(state_e0){
       case 1:
         count_e0 = count_e0 + 1;
+        current_direction = FORWARD;
         break;
       case 2:
         count_e0 = count_e0 - 1;
+        current_direction = BACKWARD;
         break;
       case 4:
         count_e0 = count_e0 - 1;
+        current_direction = BACKWARD;
         break;
       case 7:
         count_e0 = count_e0 + 1;
+        current_direction = FORWARD;
         break;
       case 8:
         count_e0 = count_e0 + 1;
+        current_direction = FORWARD;
         break;
       case 11:
         count_e0 = count_e0 - 1;
+        current_direction = BACKWARD;
         break;
       case 13:
         count_e0 = count_e0 - 1;
+        current_direction = BACKWARD;
         break;
       case 14:
         count_e0 = count_e0 + 1;
+        current_direction = FORWARD;
         break;
       default:
         break;
     }
     // Continue this if statement as necessary.
+
+    if(current_direction != last_direction){
+      unsigned long duration_time =  current_time - start_time;
+      long duration_count = count_e0 - start_count_e0;
+      left_wheel_speed = RADIUS*(((double)duration_count/(double)duration_time)/GEAR_RATIO);
+      start_count_e0 = count_e0;
+      start_time = current_time;
+    }else{
+      counter += 1;
+    }
+
+    if(11 == counter){
+      double duration_time =  ((double)(current_time - start_time))/1000000;
+      long duration_count = count_e0 - start_count_e0;
+      left_wheel_speed = RADIUS*(((double)duration_count/(double)duration_time)/GEAR_RATIO);
+      start_count_e0 = count_e0;
+      start_time = current_time;
+      counter = 1;
+    }
+
+    last_direction = current_direction;
 
     // Shift the current readings (bits 3 and 2) down
     // into position 1 and 0 (to become prior readings)

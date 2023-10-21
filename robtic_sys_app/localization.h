@@ -11,16 +11,16 @@ namespace localization {
 
 using Robotic_sys::common::Result_state;
 
-class Localization : public Robotic_sys::common::ConponentBase{
+class Localization {
  public:
 
-  const char* Name() const override;
+  const char* Name() const;
 
-  Result_state Init() override;
+  Result_state Init();
 
-  Result_state Start() override;
+  Result_state Start();
 
-  void Stop() override;
+  void Stop();
 
   virtual ~Localization() = default;
 

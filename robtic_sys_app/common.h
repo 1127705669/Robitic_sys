@@ -45,18 +45,6 @@ enum Result_state {
   State_Failed
 };
 
-class ConponentBase {
- public:
-
-  virtual Result_state Init() = 0;
-
-  virtual Result_state Start() = 0;
-
-  virtual void Stop() = 0;
-
-  virtual const char* Name() const = 0;
-};
-
 void BuzzleInit();
 
 void BuzzlePlayTone(int duration = 200, int frequency = 800);

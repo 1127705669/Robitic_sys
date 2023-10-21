@@ -4,10 +4,11 @@
 #define ENCODER_0_A_PIN  7
 #define ENCODER_0_B_PIN  23
 #define ENCODER_1_A_PIN  26
+
 #define GEAR_RATIO 358.3
 #define RADIUS 16
-//#define ENCODER_1_B_PIN Non-standard pin!
 
+//#define ENCODER_1_B_PIN Non-standard pin!
 
 // Volatile Global variables used by Encoder ISR.
 volatile long count_e0; // used by encoder to count the rotation
@@ -21,17 +22,28 @@ enum direction_type{
   NON
 };
 
-direction_type last_direction = NON;
-long counter = 0;
-unsigned long start_time = 0;
-long start_count_e0;
+direction_type last_direction_left = NON;
+direction_type last_direction_right = NON;
+
+long counter_left = 0;
+long counter_right = 0;
+
+unsigned long start_time_left = 0;
+unsigned long start_time_right = 0;
+
+long start_count_left;
+long start_count_right;
+
 double left_wheel_speed;
+double right_wheel_speed;
 
 // This ISR handles just Encoder 0
 // ISR to read the Encoder0 Channel A and B pins
 // and then look up based on  transition what kind of
 // rotation must have occured.
 ISR( INT6_vect ) {
+  unsigned long current_time = micros();
+  
   // We know that the ISR is only called when a pin changes.
   // We also know only 1 pin can change at a time.
   // The XOR(AB) signal change from "Channel A" triggers ISR.
@@ -58,11 +70,9 @@ ISR( INT6_vect ) {
     // Complete this if statement as necessary.
     // Refer to the labsheet. 
 
-    if(0 == counter){
-      start_time = micros();
+    if(0 == counter_right){
+      start_time_right = current_time;
     }
-    
-    unsigned long current_time = micros();
     
     switch(state_e0){
       case 1:
@@ -102,26 +112,18 @@ ISR( INT6_vect ) {
     }
     // Continue this if statement as necessary.
 
-    if(current_direction != last_direction){
-      unsigned long duration_time =  current_time - start_time;
-      long duration_count = count_e0 - start_count_e0;
-      left_wheel_speed = RADIUS*(((double)duration_count/(double)duration_time)/GEAR_RATIO);
-      start_count_e0 = count_e0;
-      start_time = current_time;
+    if((current_direction != last_direction_right)||(10 == counter_right)){
+      double duration_time = ((double)(current_time - start_time_right))/1000000;
+      long duration_count = count_e0 - start_count_right;
+      right_wheel_speed = -RADIUS*(((double)duration_count/(double)duration_time)/GEAR_RATIO);
+      start_count_right = count_e0;
+      start_time_right = current_time;
+      counter_right = 1;
     }else{
-      counter += 1;
+      counter_right += 1;
     }
 
-    if(11 == counter){
-      double duration_time =  ((double)(current_time - start_time))/1000000;
-      long duration_count = count_e0 - start_count_e0;
-      left_wheel_speed = RADIUS*(((double)duration_count/(double)duration_time)/GEAR_RATIO);
-      start_count_e0 = count_e0;
-      start_time = current_time;
-      counter = 1;
-    }
-
-    last_direction = current_direction;
+    last_direction_right = current_direction;
 
     // Shift the current readings (bits 3 and 2) down
     // into position 1 and 0 (to become prior readings)
@@ -137,7 +139,10 @@ ISR( INT6_vect ) {
 // and then look up based on  transition what kind of
 // rotation must have occured.
 ISR( PCINT0_vect ) {
- 
+    unsigned long current_time = micros();
+
+    direction_type current_direction;
+    
     // First, Read in the new state of the encoder pins.
 
     // Mask for a specific pin from the port.
@@ -166,6 +171,9 @@ ISR( PCINT0_vect ) {
     state_e1 = state_e1 | ( e1_B  << 3 );
     state_e1 = state_e1 | ( e1_A  << 2 );
 
+    if(0 == counter_left){
+      start_time_left = current_time;
+    }
 
     // Handle which transition we have registered.
     // Complete this if statement as necessary.
@@ -173,32 +181,53 @@ ISR( PCINT0_vect ) {
     switch(state_e1){
       case 1:
         count_e1 = count_e1 + 1;
+        current_direction = FORWARD;
         break;
       case 2:
         count_e1 = count_e1 - 1;
+        current_direction = BACKWARD;
         break;
       case 4:
         count_e1 = count_e1 - 1;
+        current_direction = BACKWARD;
         break;
       case 7:
         count_e1 = count_e1 + 1;
+        current_direction = FORWARD;
         break;
       case 8:
         count_e1 = count_e1 + 1;
+        current_direction = FORWARD;
         break;
       case 11:
         count_e1 = count_e1 - 1;
+        current_direction = BACKWARD;
         break;
       case 13:
         count_e1 = count_e1 - 1;
+        current_direction = BACKWARD;
         break;
       case 14:
         count_e1 = count_e1 + 1;
+        current_direction = FORWARD;
         break;
       default:
         break;
     }
     // Continue this if statement as necessary.
+
+    if((current_direction != last_direction_left)||(10 == counter_left)){
+      double duration_time = ((double)(current_time - start_time_left))/1000000;
+      long duration_count = count_e1 - start_count_left;
+      left_wheel_speed = -RADIUS*(((double)duration_count/(double)duration_time)/GEAR_RATIO);
+      start_count_left = count_e1;
+      start_time_left = current_time;
+      counter_left = 1;
+    }else{
+      counter_left += 1;
+    }
+
+    last_direction_left = current_direction;
 
     // Shift the current readings (bits 3 and 2) down
     // into position 1 and 0 (to become prior readings)

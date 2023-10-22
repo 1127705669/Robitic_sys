@@ -7,6 +7,7 @@
 
 #define GEAR_RATIO 358.3
 #define RADIUS 16
+#define AXIS_LENGTH 42.5
 
 //#define ENCODER_1_B_PIN Non-standard pin!
 

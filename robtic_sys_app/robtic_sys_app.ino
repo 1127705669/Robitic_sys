@@ -4,6 +4,7 @@
 #include "localization.h"
 #include "perception.h"
 #include "control.h"
+#include "kinematics.h"
 #include "encoders.h"
 
 using Robotic_sys::common::Result_state;
@@ -13,8 +14,11 @@ using Robotic_sys::common::Result_state;
   Robotic_sys::perception::Perception perception;        \
   Robotic_sys::control::Control control;                 \
   Robotic_sys::common::StateMachine state_machine;       \
+  Kinematics_c kinematic;                                \
 
 INIT_COMPONENT();
+bool is_frist_time = false;
+unsigned long last_time;
 
 void setup() {
   Serial.begin(9600);
@@ -46,6 +50,17 @@ void setup() {
 }
 
 void loop() {
+  unsigned long current_time = micros();;
+  
+  if(!is_frist_time){
+    last_time = micros();
+    is_frist_time = true;
+  }
+
+  unsigned long duration = current_time - last_time;
+
+  kinematic.update(left_wheel_speed, right_wheel_speed, duration);
+  
   Result_state state = Result_state::State_Failed;
 
   Robotic_sys::perception::Sensor sensor_lists[SENSOR_NUM];
@@ -61,9 +76,7 @@ void loop() {
 //  }
 //  
 //  Serial.println("   ");
-
-  Serial.println(count_e0/358.3);
-
+  
   if(state_machine.Init == state_machine.state){
     control.GoFixedSpeed();
     if(sensor_lists[SENSOR_DN3].is_black_line_detected_){
@@ -141,4 +154,5 @@ void loop() {
       }
     }
   }
+  last_time = current_time;
 }

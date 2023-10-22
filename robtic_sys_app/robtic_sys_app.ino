@@ -20,6 +20,9 @@ INIT_COMPONENT();
 bool is_frist_time = false;
 unsigned long last_time;
 
+double left_speed;
+double right_speed;
+
 void setup() {
   Serial.begin(9600);
 
@@ -59,7 +62,12 @@ void loop() {
 
   unsigned long duration = current_time - last_time;
 
-  kinematic.update(left_wheel_speed, right_wheel_speed, duration);
+  if((left_speed != left_wheel_speed)||(right_speed != right_wheel_speed)){
+    kinematic.update(left_wheel_speed, right_wheel_speed, duration);
+    left_speed = left_wheel_speed;
+    right_speed = right_wheel_speed;
+    last_time = current_time;
+  }
   
   Result_state state = Result_state::State_Failed;
 
@@ -75,7 +83,9 @@ void loop() {
 //    Serial.print("   ");
 //  }
 //  
-//  Serial.println("   ");
+//  Serial.print(left_wheel_speed);
+//  Serial.print("   ");
+//  Serial.println(right_wheel_speed);
   
   if(state_machine.Init == state_machine.state){
     control.GoFixedSpeed();
@@ -154,5 +164,8 @@ void loop() {
       }
     }
   }
-  last_time = current_time;
+
+  if(state_machine.ReturnHome == state_machine.state){
+    
+  }
 }

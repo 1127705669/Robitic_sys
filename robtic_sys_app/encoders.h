@@ -119,7 +119,6 @@ ISR( INT6_vect ) {
       counter_right = 1;
     }else if(10 == counter_right){
       unsigned long duration_time = current_time - start_time_right;
-      Serial.println(duration_time);
       long duration_count = count_e0 - start_count_right;
       right_wheel_speed = -RADIUS*(((double)duration_count/((double)duration_time/1000000))/GEAR_RATIO*(2*PI));
       start_count_right = count_e0;

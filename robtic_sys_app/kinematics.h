@@ -14,6 +14,7 @@ class Kinematics_c {
     double speed_ = 0.0;
     double yaw = 0.0;
     double yaw_rate = 0.0;
+    int counter = 0;
     
     // Constructor, must exist.
     Kinematics_c() {
@@ -29,7 +30,9 @@ class Kinematics_c {
       position_x_ = position_x_ + (cos(yaw)*speed_)*duration/1000000;
       position_y_ += (sin(yaw)*speed_)*duration/1000000;
 
-//      Serial.println(yaw);
+//      Serial.println(speed_);
+
+      Serial.println(yaw);
       
 //      Serial.println(position_x_);
       

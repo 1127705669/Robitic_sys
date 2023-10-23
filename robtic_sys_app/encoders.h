@@ -26,6 +26,9 @@ enum direction_type{
 direction_type last_direction_left = NON;
 direction_type last_direction_right = NON;
 
+bool is_left_updated = false;
+bool is_right_updated = false;
+
 long counter_left = 0;
 long counter_right = 0;
 
@@ -124,6 +127,7 @@ ISR( INT6_vect ) {
       start_count_right = count_e0;
       start_time_right = current_time;
       counter_right = 1;
+      is_right_updated = true;
     }else{
       counter_right += 1;
     }
@@ -232,6 +236,7 @@ ISR( PCINT0_vect ) {
       start_count_left = count_e1;
       start_time_left = current_time;
       counter_left = 1;
+      is_left_updated = true;
     }else{
       counter_left += 1;
     }

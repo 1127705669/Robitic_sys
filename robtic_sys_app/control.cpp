@@ -93,7 +93,7 @@ Result_state Control::ProduceControlCommand(){
   return Result_state::State_Ok;
 }
 
-void Control::GoFixedSpeed(int left_pwm = 20, int right_pwm = 20){
+void Control::GoFixedSpeed(int left_pwm = 20, int right_pwm = 21){
   motor_.SetMontorPower(left_pwm, right_pwm);
 }
 

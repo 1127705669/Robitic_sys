@@ -23,10 +23,10 @@ unsigned long last_time;
 double left_speed;
 double right_speed;
 
-double last_yaw;
-double return_yaw;
+double theta2_yaw;
+double theta1_yaw;
 
-unsigned long turn_time;
+unsigned long turn_time = 0;
 
 void setup() {
   Serial.begin(9600);
@@ -61,17 +61,26 @@ void loop() {
   unsigned long current_time = micros();
   
   if(!is_frist_time){
-    last_time = micros();
+    last_time = current_time;
     is_frist_time = true;
+    kinematic.counter = 1;
   }
 
-  unsigned long duration = current_time - last_time;
-
-  if((left_speed != left_wheel_speed)||(right_speed != right_wheel_speed)){
+  if(
+     (2 < kinematic.counter)&&
+     (is_left_updated) &&
+     (is_right_updated)
+    ){
+    unsigned long duration = current_time - last_time;
     kinematic.update(left_wheel_speed, right_wheel_speed, duration);
     left_speed = left_wheel_speed;
     right_speed = right_wheel_speed;
     last_time = current_time;
+    kinematic.counter = 1;
+    is_left_updated = false;
+    is_right_updated = false;
+  }else{
+    kinematic.counter += 1;
   }
   
   Result_state state = Result_state::State_Failed;
@@ -104,7 +113,6 @@ void loop() {
 
     if(state_machine.is_black_frame_edge_over_){
       state_machine.state = state_machine.JoinTheLine;
-      Robotic_sys::common::BuzzlePlayTone(300);
     }
   }
 
@@ -177,13 +185,17 @@ void loop() {
 
   if(state_machine.ReturnHome == state_machine.state){
     if(!state_machine.is_return_yaw_recoreded_){
-      last_yaw = kinematic.yaw;
+      theta2_yaw = kinematic.yaw;
+      theta1_yaw = atan2(kinematic.position_y_, kinematic.position_x_);
       state_machine.is_return_yaw_recoreded_ = true;
-      return_yaw = atan2(kinematic.position_y_, kinematic.position_x_);
     }
+    
     control.Rotate(Robotic_sys::control::Control::CLOCKWISE);
 
-    if((kinematic.yaw - last_yaw) < -(-last_yaw + PI+ return_yaw)){
+    double duration_yaw = theta2_yaw - kinematic.yaw;
+    double yaw_value = PI + theta2_yaw - theta1_yaw;
+
+    if(duration_yaw > yaw_value){
       control.GoFixedSpeed();
     }
     

@@ -40,7 +40,7 @@ class Control{
 
   void BangBangControl(Robotic_sys::perception::Sensor* sensor_lists);
 
-  void GoFixedSpeed(int left_pwm = 20, int right_pwm = 20);
+  void GoFixedSpeed(int left_pwm = 20, int right_pwm = 21);
 
   void Rotate(RotateType rotate_direction);
 

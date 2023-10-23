@@ -23,6 +23,11 @@ unsigned long last_time;
 double left_speed;
 double right_speed;
 
+double last_yaw;
+double return_yaw;
+
+unsigned long turn_time;
+
 void setup() {
   Serial.begin(9600);
 
@@ -53,7 +58,7 @@ void setup() {
 }
 
 void loop() {
-  unsigned long current_time = micros();;
+  unsigned long current_time = micros();
   
   if(!is_frist_time){
     last_time = micros();
@@ -119,14 +124,19 @@ void loop() {
   if(state_machine.FollowTheLine == state_machine.state){
     if(sensor_lists[SENSOR_DN1].is_black_line_detected_){
       state_machine.state = state_machine.NavigateCorners;
+      turn_time = micros();
     }
 
     if((sensor_lists[SENSOR_DN5].is_black_line_detected_)&&(sensor_lists[SENSOR_DN3].gray_scale_ < 50)){
       state_machine.state = state_machine.NavigateCorners;
+      turn_time = micros();
     }
     
     if((perception.IsAllBlank())&&(!state_machine.is_turning_back)){
       state_machine.is_turning_back = true;
+      if((current_time - turn_time) > 2000000){
+        state_machine.state = state_machine.ReturnHome;
+      }
     }else if(state_machine.is_turning_back){
       control.Rotate(Robotic_sys::control::Control::CLOCKWISE);
       if(sensor_lists[SENSOR_DN2].gray_scale_ > 80){
@@ -166,6 +176,18 @@ void loop() {
   }
 
   if(state_machine.ReturnHome == state_machine.state){
+    if(!state_machine.is_return_yaw_recoreded_){
+      last_yaw = kinematic.yaw;
+      state_machine.is_return_yaw_recoreded_ = true;
+      return_yaw = atan2(kinematic.position_y_, kinematic.position_x_);
+    }
+    control.Rotate(Robotic_sys::control::Control::CLOCKWISE);
+
+    if((kinematic.yaw - last_yaw) < -(-last_yaw + PI+ return_yaw)){
+      control.GoFixedSpeed();
+    }
     
+    
+    double distance = sqrt(kinematic.position_x_*kinematic.position_x_ + kinematic.position_y_*kinematic.position_y_);
   }
 }

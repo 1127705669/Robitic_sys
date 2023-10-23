@@ -37,6 +37,7 @@ class StateMachine {
   bool is_turning_back = false;
   bool is_turning_left_ = false;
   bool is_turning_right_ = false;
+  bool is_return_yaw_recoreded_ = false;
 };
 
 enum Result_state {

@@ -4,6 +4,7 @@
 
 #include "common.h"
 #include "perception.h"
+#include "pid_controller.h"
 
 namespace Robotic_sys {
 namespace control {
@@ -40,6 +41,8 @@ class Control{
 
   void BangBangControl(Robotic_sys::perception::Sensor* sensor_lists);
 
+  void ComputeControlCmd(Robotic_sys::perception::Sensor* sensor_lists, const double dt);
+
   void GoFixedSpeed(int left_pwm = 20, int right_pwm = 20);
 
   void Rotate(RotateType rotate_direction);
@@ -51,6 +54,9 @@ class Control{
  private:
 
   Motors motor_;
+
+  PIDController left_pid_controller_;
+  PIDController right_pid_controller_;
 
   Result_state ProduceControlCommand();
 

@@ -65,6 +65,8 @@ Result_state Control::Init(){
   Serial.println("control init, starting...");
 
   motor_.Init();
+  left_pid_controller_.Init();
+  right_pid_controller_.Init();
  
  return Result_state::State_Ok;
 }
@@ -81,6 +83,14 @@ void Control::BangBangControl(Robotic_sys::perception::Sensor* sensor_lists){
   int left_speed = basic_speed + (sensor_lists[3].gray_scale_*MaxTurnPWM)/100 -(sensor_lists[1].gray_scale_*MaxTurnPWM)/100;
   int right_speed = basic_speed + (sensor_lists[1].gray_scale_*MaxTurnPWM)/100 - (sensor_lists[3].gray_scale_*MaxTurnPWM)/100;
   motor_.SetMontorPower(left_speed, right_speed);
+}
+
+void Control::ComputeControlCmd(Robotic_sys::perception::Sensor* sensor_lists, const double dt){
+  int sum = sensor_lists[SENSOR_DN2].gray_scale_ + sensor_lists[SENSOR_DN4].gray_scale_;
+  double weighted_value = 2*((double)sensor_lists[SENSOR_DN4].gray_scale_/(double)sum) - 1;
+  Serial.println(weighted_value);
+  double feedback_left = left_pid_controller_.Control(weighted_value, dt);
+  double feedback_right = right_pid_controller_.Control(weighted_value, dt);
 }
 
 void Control::Stop(){

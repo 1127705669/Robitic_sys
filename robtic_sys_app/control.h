@@ -3,6 +3,7 @@
  *****************************************************************************/
 
 #include "common.h"
+#include "perception.h"
 
 namespace Robotic_sys {
 namespace control {
@@ -17,10 +18,10 @@ class Motors{
 
  private:
   // the setup function runs once when you press reset or power the board
-  const int motor_left_direction_pin_ = 16; // 电机1方向控制引脚
-  const int motor_right_direction_pin_ = 15; // 电机2方向控制引脚
-  const int motor_left_speed_pin_ = 10; // 电机2速度控制引脚
-  const int motor_right_speed_pin_ = 9; // 电机1速度控制引脚
+  const int motor_left_direction_pin_ = 16;
+  const int motor_right_direction_pin_ = 15;
+  const int motor_left_speed_pin_ = 10;
+  const int motor_right_speed_pin_ = 9;
 };
 
 class Control{
@@ -37,9 +38,9 @@ class Control{
 
   Result_state Start();
 
-  void BangBangControl(unsigned long* gray_scale);
+  void BangBangControl(Robotic_sys::perception::Sensor* sensor_lists);
 
-  void GoFixedSpeed(int left_pwm = 20, int right_pwm = 20);
+  void GoFixedSpeed(int left_pwm = 20, int right_pwm = 21);
 
   void Rotate(RotateType rotate_direction);
 
@@ -52,6 +53,10 @@ class Control{
   Motors motor_;
 
   Result_state ProduceControlCommand();
+
+  const int BiasPWM = 22;
+
+  const int MaxTurnPWM = 15;
 
  protected:
   void ComputeLateralErrors();

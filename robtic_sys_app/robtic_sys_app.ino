@@ -1,31 +1,11 @@
-/*
-  Blink
 
-  Turns an LED on for one second, then off for one second, repeatedly.
-
-  Most Arduinos have an on-board LED you can control. On the UNO, MEGA and ZERO
-  it is attached to digital pin 13, on MKR1000 on pin 6. LED_BUILTIN is set to
-  the correct LED pin independent of which board is used.
-  If you want to know what pin the on-board LED is connected to on your Arduino
-  model, check the Technical Specs of your board at:
-  https://www.arduino.cc/en/Main/Products
-
-  modified 8 May 2014
-  by Scott Fitzgerald
-  modified 2 Sep 2016
-  by Arturo Guadalupi
-  modified 8 Sep 2016
-  by Colby Newman
-
-  This example code is in the public domain.
-
-  http://www.arduino.cc/en/Tutorial/Blink
-*/
 
 #include "common.h"
 #include "localization.h"
 #include "perception.h"
 #include "control.h"
+#include "kinematics.h"
+#include "encoders.h"
 
 using Robotic_sys::common::Result_state;
 
@@ -34,8 +14,19 @@ using Robotic_sys::common::Result_state;
   Robotic_sys::perception::Perception perception;        \
   Robotic_sys::control::Control control;                 \
   Robotic_sys::common::StateMachine state_machine;       \
+  Kinematics_c kinematic;                                \
 
 INIT_COMPONENT();
+bool is_frist_time = false;
+unsigned long last_time;
+
+double left_speed;
+double right_speed;
+
+double theta2_yaw;
+double theta1_yaw;
+
+unsigned long turn_time = 0;
 
 void setup() {
   Serial.begin(9600);
@@ -50,84 +41,165 @@ void setup() {
   if(Result_state::State_Ok != perception.Init()){
     Serial.println("perception init failed!");
   }
-
+  
   if(Result_state::State_Ok != control.Init()){
     Serial.println("control init failed!");
   }
-
+  
   Robotic_sys::common::BuzzleInit();
 
-  Robotic_sys::common::BuzzlePlayTone(500);
+  setupEncoder0();
+  
+  setupEncoder1();
+  
+  Robotic_sys::common::BuzzlePlayTone(300);
   
   Serial.println("init done!");
 }
 
 void loop() {
+  unsigned long current_time = micros();
+  
+  if(!is_frist_time){
+    last_time = current_time;
+    is_frist_time = true;
+    kinematic.counter = 1;
+  }
+
+  if(
+     (2 < kinematic.counter)&&
+     (is_left_updated) &&
+     (is_right_updated)
+    ){
+    unsigned long duration = current_time - last_time;
+    kinematic.update(left_wheel_speed, right_wheel_speed, duration);
+    left_speed = left_wheel_speed;
+    right_speed = right_wheel_speed;
+    last_time = current_time;
+    kinematic.counter = 1;
+    is_left_updated = false;
+    is_right_updated = false;
+  }else{
+    kinematic.counter += 1;
+  }
+  
   Result_state state = Result_state::State_Failed;
 
-  unsigned long gray_scale[5];
+  Robotic_sys::perception::Sensor sensor_lists[SENSOR_NUM];
   
-  state = perception.GetGrayScale(gray_scale);
+  state = perception.GetGrayScale(sensor_lists);
 
 //  debug
-  for (int sensor_number = 0; sensor_number < 5; sensor_number++) {
-    Serial.print(gray_scale[sensor_number]);
-    Serial.print("   ");
-  }
-  Serial.println("   ");
+//  for (int sensor_number = 0; sensor_number < SENSOR_NUM; sensor_number++) {
+//    Serial.print(sensor_lists[sensor_number].sensor_time_);
+//    Serial.print(" ");
+//    Serial.print(sensor_lists[sensor_number].gray_scale_);
+//    Serial.print("   ");
+//  }
+//  
+//  Serial.print(left_wheel_speed);
+//  Serial.print("   ");
+//  Serial.println(right_wheel_speed);
   
-  unsigned long max_gray_scale = perception.GetMaxScale();
-
-//  debug
-//  Serial.println(max_gray_scale);
-
   if(state_machine.Init == state_machine.state){
     control.GoFixedSpeed();
-    delay(1000);
-    state_machine.state = state_machine.JoinTheLine;
+    if(sensor_lists[SENSOR_DN3].is_black_line_detected_){
+      state_machine.is_black_frame_edge_detected_ = true;
+    }
+    
+    if((state_machine.is_black_frame_edge_detected_)&&(perception.IsAllBlank())){
+      state_machine.is_black_frame_edge_over_ = true;
+    }
+
+    if(state_machine.is_black_frame_edge_over_){
+      state_machine.state = state_machine.JoinTheLine;
+    }
   }
 
   if(state_machine.JoinTheLine == state_machine.state){
-    int max_sensor_number = 0;
-    if((max_gray_scale > 2000)&&(true != state_machine.is_black_line_detected_)){
+    if((sensor_lists[SENSOR_DN1].gray_scale_ > 90)&&(!state_machine.is_black_line_detected_)){
       state_machine.is_black_line_detected_ = true;
-      Robotic_sys::common::BuzzlePlayTone(500);
-    }else if(true == state_machine.is_black_line_detected_){
+    }else if(state_machine.is_black_line_detected_){
       control.Rotate(Robotic_sys::control::Control::ANTICLOCKWISE);
+      if((sensor_lists[SENSOR_DN4].gray_scale_ > 90) && (sensor_lists[SENSOR_DN1].gray_scale_ < 50)){
+        state_machine.state = state_machine.FollowTheLine;
+      }
     }else{
       control.GoFixedSpeed();
-    }
-    
-    for (int sensor_number = 0; sensor_number < 5; sensor_number++) {
-      if(max_gray_scale == gray_scale[sensor_number]){
-        max_sensor_number = sensor_number;
-      }
-    }
-    if(2 == max_sensor_number){
-      state_machine.state = state_machine.FollowTheLine;
     }
   }
 
   if(state_machine.FollowTheLine == state_machine.state){
-    int max_sensor_number = 0;
-    for (int sensor_number = 0; sensor_number < 5; sensor_number++) {
-      if(max_gray_scale == gray_scale[sensor_number]){
-        max_sensor_number = sensor_number;
-      }
+    if(sensor_lists[SENSOR_DN1].is_black_line_detected_){
+      state_machine.state = state_machine.NavigateCorners;
+      turn_time = micros();
+    }
+
+    if((sensor_lists[SENSOR_DN5].is_black_line_detected_)&&(sensor_lists[SENSOR_DN3].gray_scale_ < 50)){
+      state_machine.state = state_machine.NavigateCorners;
+      turn_time = micros();
     }
     
-    if((max_gray_scale < 1100)&&(true != state_machine.is_turning_back)){
+    if((perception.IsAllBlank())&&(!state_machine.is_turning_back)){
       state_machine.is_turning_back = true;
-    }else if(true == state_machine.is_turning_back){
-      control.Rotate(Robotic_sys::control::Control::ANTICLOCKWISE);
-      if(2 == max_sensor_number){
+      if((current_time - turn_time) > 2000000){
+        state_machine.state = state_machine.ReturnHome;
+      }
+    }else if(state_machine.is_turning_back){
+      control.Rotate(Robotic_sys::control::Control::CLOCKWISE);
+      if(sensor_lists[SENSOR_DN2].gray_scale_ > 80){
         state_machine.is_turning_back = false;
       }
     }else{
-      control.BangBangControl(gray_scale);
+      control.BangBangControl(sensor_lists);
+    }
   }
-}
-  
 
-  
+  if(state_machine.NavigateCorners == state_machine.state){
+    if((sensor_lists[SENSOR_DN1].is_black_line_detected_)&&(!state_machine.is_turning_left_)){
+      state_machine.is_turning_left_ = true;
+    }else if(state_machine.is_turning_left_){
+      control.Rotate(Robotic_sys::control::Control::ANTICLOCKWISE);
+      if(sensor_lists[SENSOR_DN3].gray_scale_ > 60){
+        state_machine.state = state_machine.FollowTheLine;
+        state_machine.is_turning_left_ = false;
+      }
+      state_machine.is_turning_right_ = false;
+    }
+    
+    if((sensor_lists[SENSOR_DN5].is_black_line_detected_)&&(!state_machine.is_turning_right_)&&(sensor_lists[SENSOR_DN3].gray_scale_ < 50)){
+      state_machine.is_turning_right_ = true;
+    }else if(state_machine.is_turning_right_ ){
+      control.Rotate(Robotic_sys::control::Control::CLOCKWISE);
+      if(sensor_lists[SENSOR_DN1].is_black_line_detected_){
+        state_machine.is_turning_left_ = true;
+        state_machine.is_turning_right_ = false;
+      }else{
+        if(sensor_lists[SENSOR_DN3].gray_scale_ > 80){
+          state_machine.state = state_machine.FollowTheLine;
+          state_machine.is_turning_right_ = false;
+        }
+      }
+    }
+  }
+
+  if(state_machine.ReturnHome == state_machine.state){
+    if(!state_machine.is_return_yaw_recoreded_){
+      theta2_yaw = kinematic.yaw;
+      theta1_yaw = atan2(kinematic.position_y_, kinematic.position_x_);
+      state_machine.is_return_yaw_recoreded_ = true;
+    }
+    
+    control.Rotate(Robotic_sys::control::Control::CLOCKWISE);
+
+    double duration_yaw = theta2_yaw - kinematic.yaw;
+    double yaw_value = PI + theta2_yaw - theta1_yaw;
+
+    if(duration_yaw > yaw_value){
+      control.GoFixedSpeed();
+    }
+    
+    
+    double distance = sqrt(kinematic.position_x_*kinematic.position_x_ + kinematic.position_y_*kinematic.position_y_);
+  }
 }

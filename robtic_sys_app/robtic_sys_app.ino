@@ -6,6 +6,7 @@
 #include "control.h"
 #include "kinematics.h"
 #include "encoders.h"
+#include "task.h"
 
 using Robotic_sys::common::Result_state;
 
@@ -29,11 +30,7 @@ double return_yaw;
 unsigned long turn_time;
 
 void setup() {
-  Serial.begin(9600);
-
-  // waiting for conection finish
-  delay(3000);
-
+  
   if(Result_state::State_Ok != localization.Init()){
     Serial.println("location init failed!");
   }
@@ -46,13 +43,20 @@ void setup() {
     Serial.println("control init failed!");
   }
   
-  Robotic_sys::common::BuzzleInit();
+//  Robotic_sys::common::BuzzleInit();
 
   setupEncoder0();
   
   setupEncoder1();
+
+  setupTimer3();
   
-  Robotic_sys::common::BuzzlePlayTone(300);
+//  Robotic_sys::common::BuzzlePlayTone(300);
+
+  Serial.begin(9600);
+
+  // waiting for conection finish
+  delay(1500);
   
   Serial.println("init done!");
 }
@@ -80,6 +84,8 @@ void loop() {
   
   state = perception.GetGrayScale(sensor_lists);
 
+  control.ComputeControlCmd(sensor_lists, 0);
+
 //  debug
 //  for (int sensor_number = 0; sensor_number < SENSOR_NUM; sensor_number++) {
 //    Serial.print(sensor_lists[sensor_number].sensor_time_);
@@ -91,7 +97,7 @@ void loop() {
 //  Serial.print(left_wheel_speed);
 //  Serial.print("   ");
 //  Serial.println(right_wheel_speed);
-  
+
   if(state_machine.Init == state_machine.state){
     control.GoFixedSpeed();
     if(sensor_lists[SENSOR_DN3].is_black_line_detected_){
@@ -104,7 +110,7 @@ void loop() {
 
     if(state_machine.is_black_frame_edge_over_){
       state_machine.state = state_machine.JoinTheLine;
-      Robotic_sys::common::BuzzlePlayTone(300);
+//      Robotic_sys::common::BuzzlePlayTone(300);
     }
   }
 

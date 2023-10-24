@@ -88,7 +88,7 @@ void Control::BangBangControl(Robotic_sys::perception::Sensor* sensor_lists){
 void Control::ComputeControlCmd(Robotic_sys::perception::Sensor* sensor_lists, const double dt){
   int sum = sensor_lists[SENSOR_DN2].gray_scale_ + sensor_lists[SENSOR_DN4].gray_scale_;
   double weighted_value = 2*((double)sensor_lists[SENSOR_DN4].gray_scale_/(double)sum) - 1;
-  Serial.println(weighted_value);
+//  Serial.println(weighted_value);
   double feedback_left = left_pid_controller_.Control(weighted_value, dt);
   double feedback_right = right_pid_controller_.Control(weighted_value, dt);
 }

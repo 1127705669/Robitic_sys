@@ -46,9 +46,9 @@ enum Result_state {
   State_Failed
 };
 
-void BuzzleInit();
-
-void BuzzlePlayTone(int duration = 200, int frequency = 800);
+//void BuzzleInit();
+//
+//void BuzzlePlayTone(int duration = 200, int frequency = 800);
 
 } // namespace common
 } // namespace Robotic_sys

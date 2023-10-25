@@ -41,7 +41,7 @@ class Control{
 
   void BangBangControl(Robotic_sys::perception::Sensor* sensor_lists);
 
-  void ComputeControlCmd(Robotic_sys::perception::Sensor* sensor_lists, const double dt);
+  void ComputeControlCmd(double left_speed, double right_speed, const double dt);
 
   void GoFixedSpeed(int left_pwm = 20, int right_pwm = 20);
 
@@ -57,6 +57,9 @@ class Control{
 
   PIDController left_pid_controller_;
   PIDController right_pid_controller_;
+
+  double feedback_left = 20.0;
+  double feedback_right = 20.0;
 
   Result_state ProduceControlCommand();
 

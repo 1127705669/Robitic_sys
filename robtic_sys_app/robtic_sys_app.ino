@@ -1,3 +1,6 @@
+/******************************************************************************
+ * Copyright 2023 The EDrive Authors. All Rights Reserved.
+ *****************************************************************************/
 
 #include "common.h"
 #include "localization.h"
@@ -20,6 +23,7 @@ INIT_COMPONENT();
 
 bool is_frist_time = false;
 unsigned long prev_time_stamp;
+unsigned long prev_pid_time_stamp;
 
 double prev_left_speed;
 double prev_right_speed;
@@ -28,6 +32,7 @@ double theta1_yaw;
 double theta2_yaw;
 
 unsigned long turn_time_stamp;
+bool first_hit_ = true;
 
 void setup() {
   
@@ -58,7 +63,7 @@ void setup() {
 }
 
 void loop() {
-  unsigned long current_time = micros();
+  unsigned long current_time = millis();
 
   Robotic_sys::perception::Sensor sensor_lists[SENSOR_NUM];
   
@@ -70,8 +75,8 @@ void loop() {
   }
 
   if(
-     (prev_left_speed != left_wheel_speed)||(prev_right_speed != right_wheel_speed)&&
-     (2 > kinematic.counter)
+     ((prev_left_speed != left_wheel_speed)|(prev_right_speed != right_wheel_speed))&&
+     (2 < kinematic.counter)
     ){
     unsigned long duration = current_time - prev_time_stamp;
     kinematic.update(left_wheel_speed, right_wheel_speed, duration);
@@ -83,10 +88,6 @@ void loop() {
     kinematic.counter += 1;
   }
 
-  
-
-  control.ComputeControlCmd(sensor_lists, 0);
-
 //  debug
 //  for (int sensor_number = 0; sensor_number < SENSOR_NUM; sensor_number++) {
 //    Serial.print(sensor_lists[sensor_number].sensor_time_);
@@ -95,7 +96,7 @@ void loop() {
 //    Serial.print("   ");
 //  }
 //  
-  Serial.print(left_wheel_speed);
+//  Serial.print(left_wheel_speed);
 //  Serial.print("   ");
 //  Serial.println(right_wheel_speed);
 
@@ -119,7 +120,7 @@ void loop() {
       state_machine.is_black_line_detected_ = true;
     }else if(state_machine.is_black_line_detected_){
       control.Rotate(Robotic_sys::control::Control::ANTICLOCKWISE);
-      if((sensor_lists[SENSOR_DN4].gray_scale_ > 90) && (sensor_lists[SENSOR_DN1].gray_scale_ < 50)){
+      if((sensor_lists[SENSOR_DN4].gray_scale_ > 70) && (sensor_lists[SENSOR_DN1].gray_scale_ < 50)){
         state_machine.state = state_machine.FollowTheLine;
       }
     }else{
@@ -141,7 +142,7 @@ void loop() {
     if((perception.IsAllBlank())&&(!state_machine.is_turning_back)){
       state_machine.is_turning_back = true;
       if((current_time - turn_time_stamp) > 2000){
-        state_machine.state = state_machine.ReturnHome;
+        state_machine.state = state_machine.DetermineEnd;
       }
     }else if(state_machine.is_turning_back){
       control.Rotate(Robotic_sys::control::Control::CLOCKWISE);
@@ -181,7 +182,7 @@ void loop() {
     }
   }
 
-  if(state_machine.ReturnHome == state_machine.state){
+  if(state_machine.DetermineEnd == state_machine.state){
     if(!state_machine.is_return_yaw_recoreded_){
       theta2_yaw = kinematic.yaw;
       theta1_yaw = atan2(kinematic.position_y_, kinematic.position_x_);
@@ -191,11 +192,24 @@ void loop() {
     double yaw_duration = theta2_yaw - kinematic.yaw;
     
     if(yaw_duration > (PI + theta2_yaw - theta1_yaw)){
-      control.GoFixedSpeed();
+      state_machine.state = state_machine.ReturnHome;
     }else{
       control.Rotate(Robotic_sys::control::Control::CLOCKWISE);
     }
-    
-    double distance = sqrt(kinematic.position_x_*kinematic.position_x_ + kinematic.position_y_*kinematic.position_y_);
+  }
+
+  if(state_machine.ReturnHome == state_machine.state){
+    unsigned long duration = current_time - prev_pid_time_stamp;
+    if (first_hit_) {
+      first_hit_ = false;
+      prev_pid_time_stamp = current_time;
+    } else if(duration > 20) {
+      control.ComputeControlCmd(left_wheel_speed, right_wheel_speed, duration);
+      prev_pid_time_stamp = current_time;
+    }
+
+    if((kinematic.position_x_<10)&&(kinematic.position_y_<10)){
+      control.GoFixedSpeed(0,0);
+    }
   }
 }

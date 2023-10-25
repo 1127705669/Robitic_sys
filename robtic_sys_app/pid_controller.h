@@ -60,9 +60,9 @@ class PIDController {
   // void SetIntegratorHold(bool hold);
 
  protected:
-  double kp_ = 0.0;
+  double kp_ = 0.005;
   double ki_ = 0.0;
-  double kd_ = 0.0;
+  double kd_ = 0.5;
   double kaw_ = 0.0;
   double previous_error_ = 0.0;
   double previous_output_ = 0.0;

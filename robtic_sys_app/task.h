@@ -49,7 +49,7 @@ void SetupPidTimer() {
 // CTC mode.
 ISR( TIMER3_COMPA_vect ) {
  unsigned long current_time = micros();
- Serial.println(current_time - last_time_timer);
+// Serial.println(current_time - last_time_timer);
  last_time_timer = current_time;
 }
 

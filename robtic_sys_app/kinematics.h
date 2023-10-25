@@ -26,11 +26,11 @@ class Kinematics_c {
     void update(double left_speed, double right_speed, unsigned long duration) {
       speed_ = left_speed/2 + right_speed/2;
       yaw_rate = right_speed/(2*AXIS_LENGTH) - left_speed/(2*AXIS_LENGTH);
-      yaw += yaw_rate*duration/1000000;
-      position_x_ = position_x_ + (cos(yaw)*speed_)*duration/1000000;
-      position_y_ += (sin(yaw)*speed_)*duration/1000000;
+      yaw += yaw_rate*duration/1000;
+      position_x_ = position_x_ + (cos(yaw)*speed_)*duration/1000;
+      position_y_ += (sin(yaw)*speed_)*duration/1000;
 
-//      Serial.println(yaw);
+      Serial.println(yaw);
       
 //      Serial.println(position_x_);
       

@@ -38,7 +38,7 @@ class Perception{
 
   void Stop();
 
-  Result_state GetGrayScale(Sensor* sensor_lists);
+  void GetGrayScale(Sensor* sensor_lists);
 
   int GetMaxSensor();
 

@@ -7,7 +7,7 @@ volatile boolean DEBUG_LED_STATE = false;
 unsigned long last_time_timer = 0;
 
 // Routine to setupt timer3 to run
-void setupTimer3() {
+void SetupPidTimer() {
 
   // disable global interrupts
   cli();          

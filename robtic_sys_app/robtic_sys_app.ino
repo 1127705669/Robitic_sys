@@ -1,5 +1,4 @@
 
-
 #include "common.h"
 #include "localization.h"
 #include "perception.h"
@@ -18,16 +17,17 @@ using Robotic_sys::common::Result_state;
   Kinematics_c kinematic;                                \
 
 INIT_COMPONENT();
+
 bool is_frist_time = false;
-unsigned long last_time;
+unsigned long prev_time_stamp;
 
-double left_speed;
-double right_speed;
+double prev_left_speed;
+double prev_right_speed;
 
-double last_yaw;
-double return_yaw;
+double theta1_yaw;
+double theta2_yaw;
 
-unsigned long turn_time;
+unsigned long turn_time_stamp;
 
 void setup() {
   
@@ -43,15 +43,11 @@ void setup() {
     Serial.println("control init failed!");
   }
   
-//  Robotic_sys::common::BuzzleInit();
-
   setupEncoder0();
   
   setupEncoder1();
 
-  setupTimer3();
-  
-//  Robotic_sys::common::BuzzlePlayTone(300);
+  SetupPidTimer();
 
   Serial.begin(9600);
 
@@ -63,26 +59,31 @@ void setup() {
 
 void loop() {
   unsigned long current_time = micros();
-  
-  if(!is_frist_time){
-    last_time = micros();
-    is_frist_time = true;
-  }
-
-  unsigned long duration = current_time - last_time;
-
-  if((left_speed != left_wheel_speed)||(right_speed != right_wheel_speed)){
-    kinematic.update(left_wheel_speed, right_wheel_speed, duration);
-    left_speed = left_wheel_speed;
-    right_speed = right_wheel_speed;
-    last_time = current_time;
-  }
-  
-  Result_state state = Result_state::State_Failed;
 
   Robotic_sys::perception::Sensor sensor_lists[SENSOR_NUM];
   
-  state = perception.GetGrayScale(sensor_lists);
+  perception.GetGrayScale(sensor_lists);
+  
+  if(!is_frist_time){
+    prev_time_stamp = current_time;
+    is_frist_time = true;
+  }
+
+  if(
+     (prev_left_speed != left_wheel_speed)||(prev_right_speed != right_wheel_speed)&&
+     (2 > kinematic.counter)
+    ){
+    unsigned long duration = current_time - prev_time_stamp;
+    kinematic.update(left_wheel_speed, right_wheel_speed, duration);
+    prev_left_speed = left_wheel_speed;
+    prev_right_speed = right_wheel_speed;
+    prev_time_stamp = current_time;
+    kinematic.counter = 0;
+  }else{
+    kinematic.counter += 1;
+  }
+
+  
 
   control.ComputeControlCmd(sensor_lists, 0);
 
@@ -94,7 +95,7 @@ void loop() {
 //    Serial.print("   ");
 //  }
 //  
-//  Serial.print(left_wheel_speed);
+  Serial.print(left_wheel_speed);
 //  Serial.print("   ");
 //  Serial.println(right_wheel_speed);
 
@@ -110,7 +111,6 @@ void loop() {
 
     if(state_machine.is_black_frame_edge_over_){
       state_machine.state = state_machine.JoinTheLine;
-//      Robotic_sys::common::BuzzlePlayTone(300);
     }
   }
 
@@ -130,17 +130,17 @@ void loop() {
   if(state_machine.FollowTheLine == state_machine.state){
     if(sensor_lists[SENSOR_DN1].is_black_line_detected_){
       state_machine.state = state_machine.NavigateCorners;
-      turn_time = micros();
+      turn_time_stamp = millis();
     }
 
     if((sensor_lists[SENSOR_DN5].is_black_line_detected_)&&(sensor_lists[SENSOR_DN3].gray_scale_ < 50)){
       state_machine.state = state_machine.NavigateCorners;
-      turn_time = micros();
+      turn_time_stamp = millis();
     }
     
     if((perception.IsAllBlank())&&(!state_machine.is_turning_back)){
       state_machine.is_turning_back = true;
-      if((current_time - turn_time) > 2000000){
+      if((current_time - turn_time_stamp) > 2000){
         state_machine.state = state_machine.ReturnHome;
       }
     }else if(state_machine.is_turning_back){
@@ -183,16 +183,18 @@ void loop() {
 
   if(state_machine.ReturnHome == state_machine.state){
     if(!state_machine.is_return_yaw_recoreded_){
-      last_yaw = kinematic.yaw;
+      theta2_yaw = kinematic.yaw;
+      theta1_yaw = atan2(kinematic.position_y_, kinematic.position_x_);
       state_machine.is_return_yaw_recoreded_ = true;
-      return_yaw = atan2(kinematic.position_y_, kinematic.position_x_);
     }
-    control.Rotate(Robotic_sys::control::Control::CLOCKWISE);
 
-    if((kinematic.yaw - last_yaw) < -(-last_yaw + PI+ return_yaw)){
-      control.GoFixedSpeed();
-    }
+    double yaw_duration = theta2_yaw - kinematic.yaw;
     
+    if(yaw_duration > (PI + theta2_yaw - theta1_yaw)){
+      control.GoFixedSpeed();
+    }else{
+      control.Rotate(Robotic_sys::control::Control::CLOCKWISE);
+    }
     
     double distance = sqrt(kinematic.position_x_*kinematic.position_x_ + kinematic.position_y_*kinematic.position_y_);
   }

@@ -27,7 +27,7 @@ void Perception::Reset(){
   }
 }
 
-Result_state Perception::GetGrayScale(Sensor* sensor_lists){
+void Perception::GetGrayScale(Sensor* sensor_lists){
 
   // for find max sensor
   unsigned long max_gray_scale = 0;

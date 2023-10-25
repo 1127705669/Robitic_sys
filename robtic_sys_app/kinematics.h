@@ -14,6 +14,7 @@ class Kinematics_c {
     double speed_ = 0.0;
     double yaw = 0.0;
     double yaw_rate = 0.0;
+    int counter = 0;
     
     // Constructor, must exist.
     Kinematics_c() {

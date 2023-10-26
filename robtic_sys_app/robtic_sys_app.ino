@@ -30,12 +30,6 @@ double theta2_yaw;
 unsigned long turn_time_stamp;
 bool first_hit_ = true;
 
-long counter_left = 0;
-long counter_right = 0;
-
-unsigned long start_time_left = 0;
-unsigned long start_time_right = 0;
-
 long start_count_left;
 long start_count_right;
 
@@ -77,38 +71,22 @@ void loop() {
 
   if(!is_frist_time){
     prev_time_stamp = current_time;
-    start_time_right = current_time;
-    start_time_left = current_time;
-    counter_right = 0;
-    counter_left = 0;
     is_frist_time = true;
-  }
-
-  if(10 == counter_right){
-    unsigned long duration_time = current_time - start_time_right;
-    long duration_count = count_e0 - start_count_right;
-    right_wheel_speed = -RADIUS*(((double)duration_count/((double)duration_time/1000))/GEAR_RATIO*(2*PI));
-    start_count_right = count_e0;
-    start_time_right = current_time;
-    counter_right = 1;
-  }else{
-    counter_right += 1;
-  }
-
-  if(10 == counter_left){
-    unsigned long duration_time = current_time - start_time_left;
-    long duration_count = count_e1 - start_count_left;
-    left_wheel_speed = -RADIUS*(((double)duration_count/((double)duration_time/1000))/GEAR_RATIO*(2*PI));
-    start_count_left = count_e1;
-    start_time_left = current_time;
-    counter_left = 1;
-  }else{
-    counter_left += 1;
   }
 
   unsigned long duration = current_time - prev_time_stamp;
   
-  if(duration > 50){
+  if(duration > 20){
+    unsigned long duration_time = current_time - prev_time_stamp;
+    
+    long duration_count_right = count_e0 - start_count_right;
+    right_wheel_speed = -RADIUS*(((double)duration_count_right/((double)duration_time/1000))/GEAR_RATIO*(2*PI));
+    start_count_right = count_e0;
+
+    long duration_count_left = count_e1 - start_count_left;
+    left_wheel_speed = -RADIUS*(((double)duration_count_left/((double)duration_time/1000))/GEAR_RATIO*(2*PI));
+    start_count_left = count_e1;
+    
     kinematic.update(left_wheel_speed, right_wheel_speed, duration);
     prev_time_stamp = current_time;
   }
@@ -216,7 +194,7 @@ void loop() {
 
     double yaw_duration = theta2_yaw - kinematic.yaw;
     
-    if(yaw_duration > (PI + theta2_yaw - theta1_yaw)){
+    if(yaw_duration > (2*PI)){
       state_machine.state = state_machine.ReturnHome;
     }else{
       control.Rotate(Robotic_sys::control::Control::CLOCKWISE);

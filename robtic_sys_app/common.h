@@ -14,6 +14,10 @@
 #define SENSOR_DN4 3
 #define SENSOR_DN5 4
 
+#define GEAR_RATIO 358.3
+#define RADIUS 16
+#define AXIS_LENGTH 42.5
+
 namespace Robotic_sys {
 namespace common {
 

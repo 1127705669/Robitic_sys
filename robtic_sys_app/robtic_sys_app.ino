@@ -8,7 +8,6 @@
 #include "control.h"
 #include "kinematics.h"
 #include "encoders.h"
-#include "task.h"
 
 using Robotic_sys::common::Result_state;
 
@@ -25,14 +24,23 @@ bool is_frist_time = false;
 unsigned long prev_time_stamp;
 unsigned long prev_pid_time_stamp;
 
-double prev_left_speed;
-double prev_right_speed;
-
 double theta1_yaw;
 double theta2_yaw;
 
 unsigned long turn_time_stamp;
 bool first_hit_ = true;
+
+long counter_left = 0;
+long counter_right = 0;
+
+unsigned long start_time_left = 0;
+unsigned long start_time_right = 0;
+
+long start_count_left;
+long start_count_right;
+
+double left_wheel_speed;
+double right_wheel_speed;
 
 void setup() {
   
@@ -52,8 +60,6 @@ void setup() {
   
   setupEncoder1();
 
-  SetupPidTimer();
-
   Serial.begin(9600);
 
   // waiting for conection finish
@@ -68,24 +74,43 @@ void loop() {
   Robotic_sys::perception::Sensor sensor_lists[SENSOR_NUM];
   
   perception.GetGrayScale(sensor_lists);
-  
+
   if(!is_frist_time){
     prev_time_stamp = current_time;
+    start_time_right = current_time;
+    start_time_left = current_time;
+    counter_right = 0;
+    counter_left = 0;
     is_frist_time = true;
   }
 
-  if(
-     ((prev_left_speed != left_wheel_speed)|(prev_right_speed != right_wheel_speed))&&
-     (2 < kinematic.counter)
-    ){
-    unsigned long duration = current_time - prev_time_stamp;
-    kinematic.update(left_wheel_speed, right_wheel_speed, duration);
-    prev_left_speed = left_wheel_speed;
-    prev_right_speed = right_wheel_speed;
-    prev_time_stamp = current_time;
-    kinematic.counter = 0;
+  if(10 == counter_right){
+    unsigned long duration_time = current_time - start_time_right;
+    long duration_count = count_e0 - start_count_right;
+    right_wheel_speed = -RADIUS*(((double)duration_count/((double)duration_time/1000))/GEAR_RATIO*(2*PI));
+    start_count_right = count_e0;
+    start_time_right = current_time;
+    counter_right = 1;
   }else{
-    kinematic.counter += 1;
+    counter_right += 1;
+  }
+
+  if(10 == counter_left){
+    unsigned long duration_time = current_time - start_time_left;
+    long duration_count = count_e1 - start_count_left;
+    left_wheel_speed = -RADIUS*(((double)duration_count/((double)duration_time/1000))/GEAR_RATIO*(2*PI));
+    start_count_left = count_e1;
+    start_time_left = current_time;
+    counter_left = 1;
+  }else{
+    counter_left += 1;
+  }
+
+  unsigned long duration = current_time - prev_time_stamp;
+  
+  if(duration > 50){
+    kinematic.update(left_wheel_speed, right_wheel_speed, duration);
+    prev_time_stamp = current_time;
   }
 
 //  debug

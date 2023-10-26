@@ -5,6 +5,7 @@
 #define _KINEMATICS_H
 
 #include "encoders.h"
+#include "common.h"
 
 // Class to track robot position.
 class Kinematics_c {
@@ -14,7 +15,6 @@ class Kinematics_c {
     double speed_ = 0.0;
     double yaw = 0.0;
     double yaw_rate = 0.0;
-    int counter = 0;
     
     // Constructor, must exist.
     Kinematics_c() {
@@ -30,7 +30,7 @@ class Kinematics_c {
       position_x_ = position_x_ + (cos(yaw)*speed_)*duration/1000;
       position_y_ += (sin(yaw)*speed_)*duration/1000;
 
-      Serial.println(yaw);
+//      Serial.println(yaw);
       
 //      Serial.println(position_x_);
       

@@ -20,6 +20,8 @@ class PIDController {
    */
   void Init();
 
+  void Init(double kp, double ki, double kd);
+
   /**
    * @brief set pid controller coefficients for the proportional,
    * integral, and derivative

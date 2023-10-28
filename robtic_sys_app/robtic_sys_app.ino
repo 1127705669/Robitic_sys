@@ -156,7 +156,7 @@ void loop() {
       }
     }else if(state_machine.is_turning_back){
       control.Rotate(Robotic_sys::control::Control::CLOCKWISE);
-      if(sensor_lists[SENSOR_DN2].gray_scale_ > 80){
+      if(sensor_lists[SENSOR_DN2].gray_scale_ > 60){
         state_machine.is_turning_back = false;
       }
     }else{
@@ -211,28 +211,29 @@ void loop() {
 
   if(state_machine.ReturnHome == state_machine.state){
     unsigned long duration = current_time - prev_pid_time_stamp;
+    double target_yaw = PI - atan2(kinematic.position_y_, kinematic.position_x_);
     if (first_hit_) {
       first_hit_ = false;
       prev_pid_time_stamp = current_time;
     } else if(duration > 20) {
       if(
-         (kinematic.position_x_<0)|
-         (kinematic.position_y_<0)
+         ((kinematic.position_x_>-10)&&(kinematic.position_x_<10))|
+         ((kinematic.position_y_>-10)&&(kinematic.position_y_<10))
         ){
        control.GoFixedSpeed(0,0);
        }else{
-          control.ComputeControlCmd(left_wheel_speed, right_wheel_speed, duration);
+          control.ComputeHeadingCmd(target_yaw, kinematic.yaw, duration);
           prev_pid_time_stamp = current_time;
        }
       
     }
     
-    if(kinematic.position_x_<0){
-      Robotic_sys::common::BuzzlePlayTone(300);
-    }
-
-    if(kinematic.position_y_<0){
-      Robotic_sys::common::BuzzlePlayTone(300,500);
-    }
+//    if(kinematic.position_x_<-10){
+//      Robotic_sys::common::BuzzlePlayTone(300);
+//    }
+//
+//    if(kinematic.position_y_<-10){
+//      Robotic_sys::common::BuzzlePlayTone(300,500);
+//    }
   }
 }

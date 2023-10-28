@@ -42,6 +42,12 @@ void PIDController::Init() {
   SetPID();
 }
 
+void PIDController::Init(double kp, double ki, double kd) {
+  kp_ = kp;
+  ki_ = ki;
+  kd_ = kd;
+}
+
 void PIDController::Reset() {
   previous_error_ = 0.0;
   previous_output_ = 0.0;

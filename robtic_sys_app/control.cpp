@@ -67,6 +67,7 @@ Result_state Control::Init(){
   motor_.Init();
   left_pid_controller_.Init();
   right_pid_controller_.Init();
+  heading_pid_controller_.Init(2, 0, 0);
  
  return Result_state::State_Ok;
 }
@@ -96,6 +97,16 @@ void Control::ComputeControlCmd(double left_speed, double right_speed, const dou
   feedback_right += right_pid_controller_.Control(right_error, dt);
 
   motor_.SetMontorPower(feedback_left, feedback_right);
+}
+
+void Control::ComputeHeadingCmd(double demand_heading, double current_heading, const double dt){
+  double error = demand_heading - current_heading;
+  double feedback_heading_left = 20.0;
+  double feedback_heading_right = 20.0;
+
+  feedback_heading_left -= heading_pid_controller_.Control(error, dt);
+  feedback_heading_right += heading_pid_controller_.Control(error, dt);
+  motor_.SetMontorPower(feedback_heading_left, feedback_heading_right);
 }
 
 void Control::Stop(){

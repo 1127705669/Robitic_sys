@@ -43,6 +43,8 @@ class Control{
 
   void ComputeControlCmd(double left_speed, double right_speed, const double dt);
 
+  void ComputeHeadingCmd(double demand_heading, double current_heading, const double dt);
+
   void GoFixedSpeed(int left_pwm = 20, int right_pwm = 20);
 
   void Rotate(RotateType rotate_direction);
@@ -57,6 +59,7 @@ class Control{
 
   PIDController left_pid_controller_;
   PIDController right_pid_controller_;
+  PIDController heading_pid_controller_;
 
   double feedback_left = 20.0;
   double feedback_right = 20.0;

@@ -14,12 +14,12 @@ void BuzzleInit() {
   pinMode(buzzerPin, OUTPUT);
 }
 
-//void BuzzlePlayTone(int duration = 200, int frequency = 800) {
-//  const int buzzerPin = 6;
-//  tone(buzzerPin, frequency); // 发出1000Hz的声音
-//  delay(duration);             // 持续500毫秒
-//  noTone(buzzerPin);      // 停止声音
-//}
+void BuzzlePlayTone(int duration = 200, int frequency = 800) {
+  const int buzzerPin = 6;
+  tone(buzzerPin, frequency); // 发出1000Hz的声音
+  delay(duration);             // 持续500毫秒
+  noTone(buzzerPin);      // 停止声音
+}
 
 } // namespace common
 } // namespace Robotic_sys

@@ -36,6 +36,9 @@ long start_count_right;
 double left_wheel_speed;
 double right_wheel_speed;
 
+double left_linear_distance = 0;
+double right_linear_distance = 0;
+
 void setup() {
   
   if(Result_state::State_Ok != localization.Init()){
@@ -49,6 +52,8 @@ void setup() {
   if(Result_state::State_Ok != control.Init()){
     Serial.println("control init failed!");
   }
+
+  Robotic_sys::common::BuzzleInit();
   
   setupEncoder0();
   
@@ -76,18 +81,20 @@ void loop() {
 
   unsigned long duration = current_time - prev_time_stamp;
   
-  if(duration > 20){
+  if(duration > 10){
     unsigned long duration_time = current_time - prev_time_stamp;
     
     long duration_count_right = count_e0 - start_count_right;
-    right_wheel_speed = -RADIUS*(((double)duration_count_right/((double)duration_time/1000))/GEAR_RATIO*(2*PI));
+    right_linear_distance = -RADIUS*((double)duration_count_right/GEAR_RATIO*(2*PI));
+    right_wheel_speed = right_linear_distance/((double)duration_time/1000);
     start_count_right = count_e0;
 
     long duration_count_left = count_e1 - start_count_left;
-    left_wheel_speed = -RADIUS*(((double)duration_count_left/((double)duration_time/1000))/GEAR_RATIO*(2*PI));
+    left_linear_distance = -RADIUS*((double)duration_count_left/GEAR_RATIO*(2*PI));
+    left_wheel_speed = left_linear_distance/((double)duration_time/1000);
     start_count_left = count_e1;
     
-    kinematic.update(left_wheel_speed, right_wheel_speed, duration);
+    kinematic.update(left_linear_distance, right_linear_distance, left_wheel_speed, right_wheel_speed, duration);
     prev_time_stamp = current_time;
   }
 
@@ -193,8 +200,9 @@ void loop() {
     }
 
     double yaw_duration = theta2_yaw - kinematic.yaw;
+    double value = PI + theta2_yaw - theta1_yaw;
     
-    if(yaw_duration > (2*PI)){
+    if(yaw_duration > 0.95*value){
       state_machine.state = state_machine.ReturnHome;
     }else{
       control.Rotate(Robotic_sys::control::Control::CLOCKWISE);
@@ -207,12 +215,24 @@ void loop() {
       first_hit_ = false;
       prev_pid_time_stamp = current_time;
     } else if(duration > 20) {
-      control.ComputeControlCmd(left_wheel_speed, right_wheel_speed, duration);
-      prev_pid_time_stamp = current_time;
+      if(
+         (kinematic.position_x_<0)|
+         (kinematic.position_y_<0)
+        ){
+       control.GoFixedSpeed(0,0);
+       }else{
+          control.ComputeControlCmd(left_wheel_speed, right_wheel_speed, duration);
+          prev_pid_time_stamp = current_time;
+       }
+      
+    }
+    
+    if(kinematic.position_x_<0){
+      Robotic_sys::common::BuzzlePlayTone(300);
     }
 
-    if((kinematic.position_x_<10)&&(kinematic.position_y_<10)){
-      control.GoFixedSpeed(0,0);
+    if(kinematic.position_y_<0){
+      Robotic_sys::common::BuzzlePlayTone(300,500);
     }
   }
 }

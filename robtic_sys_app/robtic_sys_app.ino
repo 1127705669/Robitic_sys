@@ -211,21 +211,21 @@ void loop() {
 
   if(state_machine.ReturnHome == state_machine.state){
     unsigned long duration = current_time - prev_pid_time_stamp;
-    double target_yaw = PI - atan2(kinematic.position_y_, kinematic.position_x_);
+    double target_yaw = -(PI - atan2(kinematic.position_y_, kinematic.position_x_));
     if (first_hit_) {
       first_hit_ = false;
       prev_pid_time_stamp = current_time;
     } else if(duration > 20) {
       if(
-         ((kinematic.position_x_>-10)&&(kinematic.position_x_<10))|
-         ((kinematic.position_y_>-10)&&(kinematic.position_y_<10))
+         ((kinematic.position_x_>-5)&&(kinematic.position_x_<5))|
+         ((kinematic.position_y_>-5)&&(kinematic.position_y_<5))
         ){
        control.GoFixedSpeed(0,0);
        }else{
-          control.ComputeHeadingCmd(target_yaw, kinematic.yaw, duration);
+          control.ComputeControlCmd(left_wheel_speed, right_wheel_speed, duration);
+//          control.ComputeHeadingCmd(target_yaw, kinematic.yaw, duration);
           prev_pid_time_stamp = current_time;
        }
-      
     }
     
 //    if(kinematic.position_x_<-10){

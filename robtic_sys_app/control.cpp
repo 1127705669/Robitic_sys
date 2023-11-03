@@ -67,7 +67,7 @@ Result_state Control::Init(){
   motor_.Init();
   left_pid_controller_.Init();
   right_pid_controller_.Init();
-  heading_pid_controller_.Init(2, 0, 0);
+  heading_pid_controller_.Init(0.5, 0, 0.5);
  
  return Result_state::State_Ok;
 }

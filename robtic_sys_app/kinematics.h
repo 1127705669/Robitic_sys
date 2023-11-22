@@ -4,7 +4,7 @@
 #ifndef _KINEMATICS_H
 #define _KINEMATICS_H
 
-#include "encoders.h"
+//#include "encoders.h"
 #include "common.h"
 
 // Class to track robot position.
@@ -39,15 +39,15 @@ class Kinematics_c {
 
       yaw += yaw_rate * dt;
 
-      Serial.print(position_x_);
-
-      Serial.print("   ");
-
-      Serial.print(position_y_);
-
-      Serial.print("   ");
-
-      Serial.println(yaw);
+//      Serial.print(position_x_);
+//
+//      Serial.print("   ");
+//
+//      Serial.println(position_y_);
+//
+//      Serial.print("   ");
+//
+//      Serial.println(yaw);
     }
 
 };

@@ -27,6 +27,16 @@ class Sensor{
   int gray_scale_;
 };
 
+class Bumper{
+ public: 
+  Init(int bumper_pin);
+
+  int pin_;
+  unsigned long bumper_time_ = 0;
+  bool is_updated_ = false;
+  int collision_intensity;
+};
+
 class Perception{
  public:
 
@@ -44,12 +54,17 @@ class Perception{
 
   bool IsAllBlank();
 
+  void CollisionDetect(Bumper* bumper_lists);
+
  private:
-  static const int sensor_number_ = 5;
-  const int sensor_charge_time_ = 10;
-  
+
   const int emitPin = 11;
   
+  // line sensor data
+  static const int sensor_number_ = 5;
+  const int sensor_charge_time_ = 10;
+  int max_sensor_index;
+
   const int LineSensorPin_1 = 12;
   const int LineSensorPin_2 = A0;
   const int LineSensorPin_3 = A2;
@@ -68,9 +83,16 @@ class Perception{
   const unsigned long black_line_threshold_4_ = 2200;
   const unsigned long black_line_threshold_5_ = 2500;
   
-  int max_sensor_index = 0;
   Sensor sensor_lists_[sensor_number_];
+
+  // bumper sensor data
+  static const int bumper_number_ = 2;
+  const int bumper_charge_time_ = 10;  
   
+  const int bumper_left_pin_ = 4;
+  const int bumper_right_pin_ = 5;
+  
+  Bumper bumper_lists_[bumper_number_];
 };
 
 } // namespace perception

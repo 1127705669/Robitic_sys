@@ -22,6 +22,8 @@
 #define RADIUS 16
 #define AXIS_LENGTH 42.5
 
+#define GRAVITY 9.8
+
 namespace Robotic_sys {
 namespace common {
 
@@ -57,6 +59,14 @@ enum Result_state {
 void BuzzleInit();
 
 void BuzzlePlayTone(int duration = 200, int frequency = 800);
+
+template <typename T>
+T LowPassFilter(T prev_value, T current_value ,double weight = 0.8){
+  T output;
+  output = weight*current_value + (1.0 - weight)*prev_value;
+
+  return output;
+}
 
 } // namespace common
 } // namespace Robotic_sys

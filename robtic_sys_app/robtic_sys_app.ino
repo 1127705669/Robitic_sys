@@ -56,45 +56,38 @@ void loop() {
   volatile unsigned long current_time = millis();
 
   Robotic_sys::perception::Sensor sensor_lists[SENSOR_NUM];
-
-  perception.GetGrayScale(sensor_lists);
-
   Robotic_sys::perception::Bumper bumper_lists[BUMPER_NUM];
 
+  perception.GetGrayScale(sensor_lists);
   perception.CollisionDetect(bumper_lists);
 
-  Serial.print(bumper_lists[BL].bumper_time_);
+  unsigned long duration;
+  
+  if(is_frist_time){
+    prev_time_stamp = current_time;
+    is_frist_time = false;
+  }else{
+   duration = current_time - prev_time_stamp;
+  }
 
-  Serial.print("   ");
+  if(duration > 10){
+    localization.CalculateSpeed(count_e0, count_e1, duration);
+    localization.ComputePosition(duration);
+    localization.ImuRead();
+    prev_time_stamp = current_time;
+  }
 
-  Serial.println(bumper_lists[BR].bumper_time_);
+  unsigned long pid_duration;
+  
+  if(first_hit_){
+    prev_pid_time_stamp = current_time;
+    first_hit_ = false;
+  }else{
+    pid_duration = current_time - prev_pid_time_stamp;
+  }
 
-//  unsigned long duration;
-//
-//  if(is_frist_time){
-//    prev_time_stamp = current_time;
-//    is_frist_time = false;
-//  }else{
-//   duration = current_time - prev_time_stamp;
-//  }
-//
-//  if(duration > 10){
-//    localization.CalculateSpeed(count_e0, count_e1, duration);
-//    localization.ComputePosition(duration);
-//    prev_time_stamp = current_time;
-//  }
-//
-//  unsigned long pid_duration;
-//
-//  if(first_hit_){
-//    first_hit_ = false;
-//    prev_pid_time_stamp = current_time;
-//  }else{
-//    pid_duration = current_time - prev_pid_time_stamp;
-//  }
-//
-//  if(pid_duration > 10) {
-//    control.ComputeControlCmd(localization.left_wheel_speed, localization.right_wheel_speed, pid_duration);
-//    prev_pid_time_stamp = current_time;
-//  }
+  if(pid_duration > 10) {
+    control.ComputeControlCmd(localization.left_wheel_speed, localization.right_wheel_speed, pid_duration);
+    prev_pid_time_stamp = current_time;
+  }
 }

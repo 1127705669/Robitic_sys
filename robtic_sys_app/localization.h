@@ -4,8 +4,10 @@
 
 #pragma once
 
-#include "common.h"
+# include <Wire.h>
+# include <LSM6.h>
 
+#include "common.h"
 #include "kinematics.h"
 
 namespace Robotic_sys {
@@ -28,10 +30,17 @@ class Localization {
 
   void ComputePosition(long duration);
 
+  void ImuRead();
+
   virtual ~Localization() = default;
 
   double left_wheel_speed;
   double right_wheel_speed;
+
+  // imu
+  double filted_acceleration_x_;
+  double filted_acceleration_y_;
+  double filted_acceleration_z_;
 
  private:
   Kinematics_c kinematic;
@@ -42,6 +51,20 @@ class Localization {
   double left_linear_distance = 0;
   double right_linear_distance = 0;
 
+  LSM6 imu;
+
+  bool imu_first_hit = true;
+  
+  const double conversion_factor_accelerometer_ = 0.061;
+  const double conversion_factor_gyroscope_ = 8.75;
+
+  double prev_acceleration_x_;
+  double prev_acceleration_y_;
+  double prev_acceleration_z_;
+  
+  double prev_gyroscope_x_;
+  double prev_gyroscope_y_;
+  double prev_gyroscope_z_;
 };
 
 } // namespace localization

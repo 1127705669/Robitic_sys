@@ -55,11 +55,11 @@ void setup() {
 void loop() {
   volatile unsigned long current_time = millis();
 
-  Robotic_sys::perception::Sensor sensor_lists[SENSOR_NUM];
-  Robotic_sys::perception::Bumper bumper_lists[BUMPER_NUM];
+  static Robotic_sys::perception::Sensor sensor_lists[SENSOR_NUM];
+  static Robotic_sys::perception::Bumper bumper_lists[BUMPER_NUM];
 
   unsigned long duration;
-  
+
   if(is_frist_time){
     prev_time_stamp = current_time;
     is_frist_time = false;
@@ -71,31 +71,36 @@ void loop() {
     perception.GetGrayScale(sensor_lists);
     perception.CollisionDetect(bumper_lists);
 
-    Serial.print(bumper_lists[BL].bumper_time_);
-    Serial.print("  ");
-    Serial.print(bumper_lists[BR].bumper_time_);
-    Serial.print("  ");
-    Serial.print(bumper_lists[BL].min_bumper_time_);
-    Serial.print("  ");
-    Serial.println(bumper_lists[BR].min_bumper_time_);
-
     localization.CalculateSpeed(count_e0, count_e1, duration);
     localization.ComputePosition(duration);
     localization.ImuRead();
+    
     prev_time_stamp = current_time;
   }
 
-  unsigned long pid_duration;
-  
-  if(first_hit_){
-    prev_pid_time_stamp = current_time;
-    first_hit_ = false;
-  }else{
-    pid_duration = current_time - prev_pid_time_stamp;
-  }
+  Serial.print(bumper_lists[BL].bumper_time_);
+  Serial.print("  ");
+  Serial.print(bumper_lists[BR].bumper_time_);
+  Serial.print("  ");
+  Serial.print(bumper_lists[BL].min_bumper_time_);
+  Serial.print("  ");
+  Serial.println(bumper_lists[BR].min_bumper_time_);
 
-  if(pid_duration > 10) {
-    control.ComputeControlCmd(localization.left_wheel_speed, localization.right_wheel_speed, pid_duration);
-    prev_pid_time_stamp = current_time;
+  if((bumper_lists[BL].min_bumper_time_ < 230)|(bumper_lists[BR].min_bumper_time_ < 190)){
+    control.GoFixedSpeed(0, 0);
+  }else{
+    unsigned long pid_duration;
+  
+    if(first_hit_){
+      prev_pid_time_stamp = current_time;
+      first_hit_ = false;
+    }else{
+      pid_duration = current_time - prev_pid_time_stamp;
+    }
+  
+    if(pid_duration > 10) {
+      control.ComputeControlCmd(localization.left_wheel_speed, localization.right_wheel_speed, pid_duration);
+      prev_pid_time_stamp = current_time;
+    }
   }
 }

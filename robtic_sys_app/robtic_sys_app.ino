@@ -58,9 +58,6 @@ void loop() {
   Robotic_sys::perception::Sensor sensor_lists[SENSOR_NUM];
   Robotic_sys::perception::Bumper bumper_lists[BUMPER_NUM];
 
-  perception.GetGrayScale(sensor_lists);
-  perception.CollisionDetect(bumper_lists);
-
   unsigned long duration;
   
   if(is_frist_time){
@@ -70,7 +67,18 @@ void loop() {
    duration = current_time - prev_time_stamp;
   }
 
-  if(duration > 10){
+  if(duration > 20){
+    perception.GetGrayScale(sensor_lists);
+    perception.CollisionDetect(bumper_lists);
+
+    Serial.print(bumper_lists[BL].bumper_time_);
+    Serial.print("  ");
+    Serial.print(bumper_lists[BR].bumper_time_);
+    Serial.print("  ");
+    Serial.print(bumper_lists[BL].min_bumper_time_);
+    Serial.print("  ");
+    Serial.println(bumper_lists[BR].min_bumper_time_);
+
     localization.CalculateSpeed(count_e0, count_e1, duration);
     localization.ComputePosition(duration);
     localization.ImuRead();

@@ -32,6 +32,9 @@ class Bumper{
   Init(int bumper_pin);
 
   int pin_;
+  bool is_first_hit_ = true;
+  unsigned long min_bumper_time_ = 0;
+  unsigned long prev_bumper_time_ = 0;
   unsigned long bumper_time_ = 0;
   bool is_updated_ = false;
   int collision_intensity;

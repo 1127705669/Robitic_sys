@@ -164,11 +164,24 @@ void Perception::CollisionDetect(Bumper* bumper_lists){
         bumper_lists_[sensor_number].bumper_time_ = current_time - start_time;
         bumper_lists_[sensor_number].is_updated_ = true;
       }
-    }        
+    }
   }
 
   for (int sensor_number = 0; sensor_number < bumper_number_; sensor_number++) {
+    if(bumper_lists_[sensor_number].is_first_hit_){
+      bumper_lists_[sensor_number].min_bumper_time_ = bumper_lists_[sensor_number].bumper_time_;
+      bumper_lists_[sensor_number].prev_bumper_time_ = bumper_lists_[sensor_number].bumper_time_;
+      bumper_lists_[sensor_number].is_first_hit_ = false;
+    }
+    bumper_lists_[sensor_number].bumper_time_ = Robotic_sys::common::LowPassFilter(bumper_lists_[sensor_number].prev_bumper_time_, bumper_lists_[sensor_number].bumper_time_);
+    bumper_lists_[sensor_number].prev_bumper_time_ = bumper_lists_[sensor_number].bumper_time_;
+
+    if(bumper_lists_[sensor_number].bumper_time_ < bumper_lists_[sensor_number].min_bumper_time_){
+      bumper_lists_[sensor_number].min_bumper_time_ = bumper_lists_[sensor_number].bumper_time_;
+    }
+    
     bumper_lists_[sensor_number].is_updated_ = false;
+    
     bumper_lists[sensor_number] = bumper_lists_[sensor_number];
   }
 }
